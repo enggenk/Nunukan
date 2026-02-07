@@ -296,22 +296,23 @@ let voiceInterval = null;        // interval voice global
             
             
           // Ambil data lokal dulu agar aplikasi langsung tampil (cepat & mendukung offline)
+// --- LOAD DATA AWAL ---
 const localCache = localStorage.getItem('ysa_offline_data');
 if (localCache) {
     const data = JSON.parse(localCache);
     updateLocalVariables(data);
-    initDashboard(); // Tampilkan data yang ada di memori HP dulu
+    initDashboard(); // Tampilkan data dari HP dulu supaya cepat
 }
 
-// Tetap pantau Firebase jika online
+// Pantau perubahan dari server
 db.ref('app_data').on('value', (snapshot) => {
     const data = snapshot.val();
     if (data) {
+        // Hanya update variabel jika sedang online untuk sinkronisasi antar perangkat
         updateLocalVariables(data);
-        // Simpan versi server terbaru ke lokal
         localStorage.setItem('ysa_offline_data', JSON.stringify(data));
         
-        // Refresh tampilan
+        // Cek jika sedang tidak dalam proses input, baru refresh otomatis
         if (currentUser) {
             initDashboard();
             renderQueue();
@@ -378,17 +379,21 @@ function saveAppState() {
         activeUsers, activeDurations, activeStaff, activeTransferInfo
     };
 
-    // 1. Simpan ke LocalStorage selalu (untuk akses offline)
+    // 1. Simpan ke LocalStorage SEGERA (agar data aman di HP)
     localStorage.setItem('ysa_offline_data', JSON.stringify(data));
 
-    // 2. Coba simpan ke Firebase hanya jika online
+    // 2. REFRESH UI SEGERA (Penting: agar tombol langsung merespon saat diklik)
+    initDashboard(); 
+    renderQueue();
+    renderLogs();
+
+    // 3. Kirim ke Firebase jika ada internet
     if (navigator.onLine) {
         db.ref('app_data').update(data)
             .then(() => console.log("Cloud Sync: Berhasil"))
-            .catch((err) => console.error("Cloud Sync: Gagal, tersimpan lokal", err));
+            .catch((err) => console.error("Cloud Sync: Antri...", err));
     } else {
-        console.warn("Offline: Data disimpan di perangkat.");
-        showOfflineBanner(true); // Opsional: Beritahu staff kalau sedang offline
+        showOfflineBanner(true); // Beritahu staff sedang offline
     }
 }
 
@@ -709,6 +714,7 @@ function finalStop(i, markAsPaid) {
 
     saveAppState();
     closeStopModal();
+    initDashboard(); 
 }
 
 function closeStopModal() { 
@@ -991,6 +997,35 @@ function speakExpiredUnits() {
         }, 600);
     }
 }
+
+// Pantau status internet secara real-time
+window.addEventListener('online', () => {
+    showOfflineBanner(false);
+    console.log("Internet Kembali! Sinkronisasi data ke server...");
+    
+    // Paksa upload data lokal terakhir ke server saat kembali online
+    const localData = localStorage.getItem('ysa_offline_data');
+    if (localData) {
+        db.ref('app_data').update(JSON.parse(localData));
+    }
+});
+
+window.addEventListener('offline', () => {
+    showOfflineBanner(true);
+});
+
+function showOfflineBanner(show) {
+    let banner = document.getElementById('offline-notice');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'offline-notice';
+        banner.style = "position:fixed; top:0; left:0; width:100%; background:var(--danger); color:white; text-align:center; font-size:0.75rem; z-index:9999; padding:8px; font-weight:bold; box-shadow: 0 2px 5px rgba(0,0,0,0.2);";
+        banner.innerText = "⚠️ KONEKSI TERPUTUS: Data tetap tersimpan di HP & akan upload otomatis saat online.";
+        document.body.appendChild(banner);
+    }
+    banner.style.display = show ? 'block' : 'none';
+}
+
 
 </script>
 </body>
