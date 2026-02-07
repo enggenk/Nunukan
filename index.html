@@ -292,21 +292,54 @@ const firebaseConfig = {
 let voiceInterval = null;        // interval voice global
 
         db.ref('app_data').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
+            const data = snapshot.val() || {}
+            
+            
+          // Ambil data lokal dulu agar aplikasi langsung tampil (cepat & mendukung offline)
+const localCache = localStorage.getItem('ysa_offline_data');
+if (localCache) {
+    const data = JSON.parse(localCache);
+    updateLocalVariables(data);
+    initDashboard(); // Tampilkan data yang ada di memori HP dulu
+}
+
+// Tetap pantau Firebase jika online
+db.ref('app_data').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (data) {
+        updateLocalVariables(data);
+        // Simpan versi server terbaru ke lokal
+        localStorage.setItem('ysa_offline_data', JSON.stringify(data));
+        
+        // Refresh tampilan
+        if (currentUser) {
+            initDashboard();
+            renderQueue();
+            renderLogs();
+        }
+    }
+});
+
+        
+        
             users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
             unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
             prices = data.prices || { "20": 10000, "40": 18000, "60": 35000 };
-            logs = data.logs || [];
-            queue = data.queue || [];
-            endTimes = data.endTimes || {};
-            startTimes = data.startTimes || {}; 
-            isPaused = data.isPaused || {};
-            isPaid = data.isPaid || {};
-            activeUsers = data.activeUsers || {};
-            activeDurations = data.activeDurations || {};
-            activeStaff = data.activeStaff || {};
-            activeTransferInfo = data.activeTransferInfo || {};
-
+function updateLocalVariables(data) {
+    users = data.users || users;
+    unitNames = data.units || unitNames;
+    prices = data.prices || prices;
+    logs = data.logs || [];
+    queue = data.queue || [];
+    endTimes = data.endTimes || {};
+    startTimes = data.startTimes || {};
+    isPaused = data.isPaused || {};
+    isPaid = data.isPaid || {};
+    activeUsers = data.activeUsers || {};
+    activeDurations = data.activeDurations || {};
+    activeStaff = data.activeStaff || {};
+    activeTransferInfo = data.activeTransferInfo || {};
+}
             document.getElementById('loading-text').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
 
@@ -335,13 +368,58 @@ if (savedUser) {
     renderUserList();
 }
 
-        function saveAppState() {
-            db.ref('app_data').update({
-                users, units: unitNames, prices, logs, queue,
-                endTimes, startTimes, isPaused, isPaid,
-                activeUsers, activeDurations, activeStaff, activeTransferInfo
-            });
-        }
+        // --- LOGIKA OFFLINE & SYNC ---
+
+// Fungsi untuk menyimpan data secara Lokal & Cloud
+function saveAppState() {
+    const data = {
+        users, units: unitNames, prices, logs, queue,
+        endTimes, startTimes, isPaused, isPaid,
+        activeUsers, activeDurations, activeStaff, activeTransferInfo
+    };
+
+    // 1. Simpan ke LocalStorage selalu (untuk akses offline)
+    localStorage.setItem('ysa_offline_data', JSON.stringify(data));
+
+    // 2. Coba simpan ke Firebase hanya jika online
+    if (navigator.onLine) {
+        db.ref('app_data').update(data)
+            .then(() => console.log("Cloud Sync: Berhasil"))
+            .catch((err) => console.error("Cloud Sync: Gagal, tersimpan lokal", err));
+    } else {
+        console.warn("Offline: Data disimpan di perangkat.");
+        showOfflineBanner(true); // Opsional: Beritahu staff kalau sedang offline
+    }
+}
+
+// Pantau status internet
+window.addEventListener('online', () => {
+    console.log("Internet Kembali! Melakukan sinkronisasi...");
+    showOfflineBanner(false);
+    
+    // Ambil data terakhir dari lokal dan paksa upload ke server
+    const localData = localStorage.getItem('ysa_offline_data');
+    if (localData) {
+        db.ref('app_data').update(JSON.parse(localData));
+    }
+});
+
+window.addEventListener('offline', () => {
+    showOfflineBanner(true);
+});
+
+function showOfflineBanner(show) {
+    // Anda bisa membuat elemen div kecil di atas layar untuk info offline
+    let banner = document.getElementById('offline-notice');
+    if (!banner) {
+        banner = document.createElement('div');
+        banner.id = 'offline-notice';
+        banner.style = "position:fixed; top:0; left:0; width:100%; background:var(--danger); color:white; text-align:center; font-size:0.7rem; z-index:9999; padding:5px;";
+        banner.innerText = "Mode Offline: Data tersimpan di HP, akan upload otomatis saat ada sinyal.";
+        document.body.appendChild(banner);
+    }
+    banner.style.display = show ? 'block' : 'none';
+}
 
         function attemptLogin() {
     const u = document.getElementById('user-input').value;
