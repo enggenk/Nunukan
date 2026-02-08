@@ -1,0 +1,20 @@
+{
+  "name": "YSA021 Sinjai Timer",
+  "short_name": "SinjaiTimer",
+  "start_url": "./index.html",
+  "display": "standalone",
+  "background_color": "#e0f2fe",
+  "theme_color": "#6366f1",
+  "icons": [
+    {
+      "src": "https://enggenk.github.io/Sinjai/logo-512.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "https://enggenk.github.io/Sinjai/logo-512.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ]
+}
