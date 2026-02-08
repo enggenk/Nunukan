@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinjai-timer-v3.2'; // Ubah versi untuk memicu update
+const CACHE_NAME = 'sinjai-timer-v3.3'; // Ubah versi untuk memicu update
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
