@@ -308,8 +308,35 @@ if (offlineData) {
     console.log('📦 Data dimuat dari local backup');
 }
         
+        if (!navigator.onLine && offlineData) {
+    initOfflineApp();
+}
         
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
+        
+        function initOfflineApp() {
+    console.log('⚡ Bootstrapping OFFLINE UI');
+
+    document.getElementById('loading-text').style.display = 'none';
+    document.getElementById('login-form').style.display = 'block';
+
+    const savedUser = localStorage.getItem('currentUser');
+    if (!savedUser) return;
+
+    currentUser = JSON.parse(savedUser);
+
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('current-user-display').innerText =
+        "Aktif: " + currentUser.user;
+
+    applyPermissions();
+    initDashboard();
+    renderQueue();
+    renderLogs();
+    renderUserList();
+}
+
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
         let expiredUnits = new Set();     // unit yang sudah habis
 let voiceInterval = null;        // interval voice global
