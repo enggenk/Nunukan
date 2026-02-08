@@ -101,7 +101,7 @@ order: 0 !important;
 
 <div id="app" style="display:none;">  
 <div id="offline-banner" style="display:none; background: #ef4444; color: white; text-align: center; padding: 8px; font-size: 0.8rem; font-weight: bold; position: sticky; top: 0; z-index: 2001;">
-    ⚠️ Jaringan bermasalah! JANGAN RELOAD / JANGAN KI SCROLL KEBAWAH APLIKASI DULU NAHH!! 
+    ⚠️ Jaringan bermasalah! JANGAN RELOAD BOSCU / JANGAN KI SCROLL KEBAWAH INI APLIKASI DULU NAHH!! 
 </div>
 
     <div id="view-units" class="view-section active">  
@@ -322,7 +322,7 @@ currentUser = JSON.parse(savedUser);
 document.getElementById('login-overlay').style.display = 'none';  
 document.getElementById('app').style.display = 'block';  
 document.getElementById('current-user-display').innerText =  
-    "Aktif: " + currentUser.user;  
+    "Server: " + currentUser.user;  
 
 applyPermissions();  
 initDashboard();  
@@ -338,8 +338,7 @@ console.log('⚡ OFFLINE MODE');
 const savedUser = localStorage.getItem('currentUser');  
 
 // ❌ JANGAN tampilkan form login  
-document.getElementById('loading-text').innerText =  
-    "Mode Offline Aktif";  
+
 
 // ✅ Jika ada session → langsung masuk  
 if (savedUser) {  
@@ -1095,7 +1094,7 @@ function handleConnectionChange() {
     } else {
         banner.style.display = 'block';
         if (userDisplay) {
-            userDisplay.innerText = "Mode Offline Aktif";
+            userDisplay.innerText = "localStorage:" + currentUser.user;  
             userDisplay.style.color = '#ef4444';
         }
     }
