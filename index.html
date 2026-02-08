@@ -289,10 +289,11 @@ const firebaseConfig = {
         
         const offlineData = localStorage.getItem('offline_backup');
 if (offlineData) {
+    console.log('📦 Data dimuat dari local backup (Early Load)');
     const data = JSON.parse(offlineData);
 
     users = data.users || users;
-    unitNames = data.units || unitNames;
+    unitNames = data.unitNames || unitNames;
     prices = data.prices || prices;
     logs = data.logs || [];
     queue = data.queue || [];
@@ -304,6 +305,9 @@ if (offlineData) {
     activeDurations = data.activeDurations || {};
     activeStaff = data.activeStaff || {};
     activeTransferInfo = data.activeTransferInfo || {};
+    bootstrapApp(); 
+}
+
 
     console.log('📦 Data dimuat dari local backup');
 }
@@ -367,34 +371,77 @@ if (offlineData) {
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
         let expiredUnits = new Set();     // unit yang sudah habis
 let voiceInterval = null;        // interval voice global
+// --- 1. JALANKAN INI DULU (AGAR BISA OFFLINE) ---
+function loadFromLocalStorage() {
+    const offlineData = localStorage.getItem('offline_backup');
+    if (offlineData) {
+        const data = JSON.parse(offlineData);
+        users = data.users || users;
+        unitNames = data.unitNames || data.units || unitNames;
+        prices = data.prices || prices;
+        logs = data.logs || [];
+        queue = data.queue || [];
+        endTimes = data.endTimes || {};
+        startTimes = data.startTimes || {}; 
+        isPaused = data.isPaused || {};
+        isPaid = data.isPaid || {};
+        activeUsers = data.activeUsers || {};
+        activeDurations = data.activeDurations || {};
+        activeStaff = data.activeStaff || {};
+        activeTransferInfo = data.activeTransferInfo || {};
+        
+        console.log('✅ Offline Data Loaded');
+        bootstrapApp(); // Langsung masuk ke app tanpa tunggu Firebase
+    }
+}
 
-        db.ref('app_data').on('value', (snapshot) => {
-            const data = snapshot.val() || {};
-            users = data.users || [{user: "admin", pass: "1234", role: "admin"}];
-            unitNames = data.units || ["Unit 1", "Unit 2", "Unit 3", "Unit 4"];
-            prices = data.prices || { "20": 10000, "40": 18000, "60": 35000 };
-            logs = data.logs || [];
-            queue = data.queue || [];
-            endTimes = data.endTimes || {};
-            startTimes = data.startTimes || {}; 
-            isPaused = data.isPaused || {};
-            isPaid = data.isPaid || {};
-            activeUsers = data.activeUsers || {};
-            activeDurations = data.activeDurations || {};
-            activeStaff = data.activeStaff || {};
-            activeTransferInfo = data.activeTransferInfo || {};
-            bootstrapApp();
+// Panggil fungsi muat lokal segera
+loadFromLocalStorage();
 
-            document.getElementById('loading-text').style.display = 'none';
-            document.getElementById('login-form').style.display = 'block';
+// --- 2. LOGIKA FIREBASE (JALAN DI LATAR BELAKANG) ---
+db.ref('app_data').on('value', (snapshot) => {
+    const data = snapshot.val();
+    if (!data) return;
 
-            if (currentUser) {
-                applyPermissions(); initDashboard(); renderQueue(); renderLogs(); renderUserList();
-                document.getElementById('p-20').value = prices[20] || 0;
-                document.getElementById('p-40').value = prices[40] || 0;
-                document.getElementById('p-60').value = prices[60] || 0;
-            }
-        });
+    console.log('📡 Syncing from Firebase...');
+    users = data.users || users;
+    unitNames = data.units || unitNames;
+    prices = data.prices || prices;
+    logs = data.logs || [];
+    queue = data.queue || [];
+    endTimes = data.endTimes || {};
+    startTimes = data.startTimes || {}; 
+    isPaused = data.isPaused || {};
+    isPaid = data.isPaid || {};
+    activeUsers = data.activeUsers || {};
+    activeDurations = data.activeDurations || {};
+    activeStaff = data.activeStaff || {};
+    activeTransferInfo = data.activeTransferInfo || {};
+
+    // Sembunyikan loading jika data sudah sampai
+    document.getElementById('loading-text').style.display = 'none';
+    document.getElementById('login-form').style.display = 'block';
+
+    if (currentUser) {
+        initDashboard();
+        renderQueue();
+        renderLogs();
+        // Update input harga di admin panel
+        if(document.getElementById('p-20')) {
+            document.getElementById('p-20').value = prices[20] || 0;
+            document.getElementById('p-40').value = prices[40] || 0;
+            document.getElementById('p-60').value = prices[60] || 0;
+        }
+    }
+    
+    // Simpan hasil download terbaru ke lokal untuk penggunaan offline nanti
+    saveLocalBackup();
+}, (error) => {
+    // JIKA ERROR (OFFLINE): Paksa tampilkan form login
+    console.warn("Firebase offline/error:", error);
+    document.getElementById('loading-text').innerText = "Mode Offline Aktif";
+    document.getElementById('login-form').style.display = 'block';
+});
 
 
         function saveAppState() {
