@@ -310,10 +310,29 @@ if (offlineData) {
         
         if (!navigator.onLine && offlineData) {
     initOfflineApp();
+    bootstrapApp();
 }
         
         let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';
         
+        function bootstrapApp() {
+    const savedUser = localStorage.getItem('currentUser');
+    if (!savedUser) return;
+
+    currentUser = JSON.parse(savedUser);
+
+    document.getElementById('login-overlay').style.display = 'none';
+    document.getElementById('app').style.display = 'block';
+    document.getElementById('current-user-display').innerText =
+        "Aktif: " + currentUser.user;
+
+    applyPermissions();
+    initDashboard();
+    renderQueue();
+    renderLogs();
+    renderUserList();
+}
+
         function initOfflineApp() {
     console.log('⚡ Bootstrapping OFFLINE UI');
 
@@ -356,6 +375,7 @@ let voiceInterval = null;        // interval voice global
             activeDurations = data.activeDurations || {};
             activeStaff = data.activeStaff || {};
             activeTransferInfo = data.activeTransferInfo || {};
+            bootstrapApp();
 
             document.getElementById('loading-text').style.display = 'none';
             document.getElementById('login-form').style.display = 'block';
@@ -367,23 +387,7 @@ let voiceInterval = null;        // interval voice global
                 document.getElementById('p-60').value = prices[60] || 0;
             }
         });
-        // 🔄 AUTO RESTORE LOGIN SAAT RELOAD
-const savedUser = localStorage.getItem('currentUser');
 
-if (savedUser) {
-    currentUser = JSON.parse(savedUser);
-
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('current-user-display').innerText =
-        "Aktif: " + currentUser.user;
-
-    applyPermissions();
-    initDashboard();
-    renderQueue();
-    renderLogs();
-    renderUserList();
-}
 
         function saveAppState() {
     const data = {
