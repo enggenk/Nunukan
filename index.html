@@ -100,6 +100,10 @@ order: 0 !important;
 </div>  
 
 <div id="app" style="display:none;">  
+<div id="offline-banner" style="display:none; background: #ef4444; color: white; text-align: center; padding: 8px; font-size: 0.8rem; font-weight: bold; position: sticky; top: 0; z-index: 2001;">
+    ⚠️ Jaringan bermasalah! JANGAN RELOAD / JANGAN KI SCROLL KEBAWAH APLIKASI DULU NAHH!! 
+</div>
+
     <div id="view-units" class="view-section active">  
         <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">  
             <h2 style="margin:0">Timer Sinjai</h2>  
@@ -446,6 +450,7 @@ const data = {
     _updatedAt: Date.now()  
 };  
 
+
 // selalu simpan lokal dulu  
 localStorage.setItem('offline_backup', JSON.stringify(data));  
 
@@ -455,10 +460,16 @@ db.ref('app_data').update(data)
         localStorage.removeItem('pending_sync');  
     })  
     .catch(() => {  
+       handleSyncFailure();
         console.warn('Offline → data disimpan lokal');  
         localStorage.setItem('pending_sync', 'true');  
     });
 
+}
+function handleSyncFailure() {
+    console.log('Data disimpan secara lokal (Offline)');
+    localStorage.setItem('pending_sync', 'true');
+    // Menampilkan toast kecil atau pesan bahwa data belum sinkron
 }
 
 function saveLocalBackup() {
@@ -926,11 +937,14 @@ localStorage.removeItem('pending_sync');
       
     // 1. Register Service Worker (Wajib untuk PWA)  
     if ('serviceWorker' in navigator) {  
-        window.addEventListener('load', () => {  
-            navigator.serviceWorker.register('./sw.js')  
-                .then((reg) => console.log('Service Worker registered.', reg));  
-        });  
-    }  
+    window.addEventListener('load', () => {  
+        // Memastikan file sw.js berada di folder yang sama dengan index.html
+        navigator.serviceWorker.register('./sw.js')  
+            .then((reg) => console.log('Service Worker Berhasil: ', reg.scope))
+            .catch((err) => console.log('Service Worker Gagal: ', err));  
+    });  
+}
+
   
     let deferredPrompt;  
     const installModal = document.getElementById('modal-install-pwa');  
@@ -1066,6 +1080,64 @@ function speakExpiredUnits() {
         }, 600);  
     }  
 }  
+
+function handleConnectionChange() {
+    const banner = document.getElementById('offline-banner');
+    const userDisplay = document.getElementById('current-user-display');
+    
+    if (navigator.onLine) {
+        banner.style.display = 'none';
+        if (userDisplay) userDisplay.style.color = '#64748b';
+        // Opsional: Langsung sinkronkan data saat sinyal kembali
+        if (localStorage.getItem('pending_sync')) {
+            saveAppState();
+        }
+    } else {
+        banner.style.display = 'block';
+        if (userDisplay) {
+            userDisplay.innerText = "Mode Offline Aktif";
+            userDisplay.style.color = '#ef4444';
+        }
+    }
+}
+
+// Pasang pendengar event
+window.addEventListener('online', handleConnectionChange);
+window.addEventListener('offline', handleConnectionChange);
+
+// Jalankan sekali saat startup
+handleConnectionChange();
+
+// Fungsi untuk mengatur tampilan peringatan offline
+function updateOnlineStatus() {
+    const offlineAlert = document.getElementById('offline-alert');
+    const userDisplay = document.getElementById('current-user-display');
+
+    if (navigator.onLine) {
+        // Saat Online
+        offlineAlert.style.display = 'none';
+        if (userDisplay) userDisplay.style.color = '#64748b'; // Warna normal
+    } else {
+        // Saat Offline
+        offlineAlert.style.display = 'block';
+        if (userDisplay) {
+            userDisplay.innerText = "Mode Offline Aktif (Data disimpan lokal)";
+            userDisplay.style.color = 'var(--danger)';
+        }
+        
+        // Opsional: Berikan feedback suara atau getaran
+        if ('vibrate' in navigator) navigator.vibrate(200);
+        console.warn("Aplikasi beralih ke mode offline.");
+    }
+}
+
+// Pasang Event Listener
+window.addEventListener('online', updateOnlineStatus);
+window.addEventListener('offline', updateOnlineStatus);
+
+// Jalankan pengecekan saat aplikasi pertama kali dimuat
+updateOnlineStatus();
+
   
 </script>  </body>  
 </html>  
