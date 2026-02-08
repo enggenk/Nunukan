@@ -275,50 +275,6 @@ const db = firebase.database();
 let users = [], unitNames = [], prices = {}, logs = [], queue = [];  
     let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};  
       
-      function forceOfflineBootstrap() {
-    const savedUser = localStorage.getItem('currentUser');
-    const offlineData = localStorage.getItem('offline_backup');
-
-    if (!savedUser || !offlineData) {
-        document.getElementById('loading-text').innerText =
-            "Offline — login pertama wajib online";
-        document.getElementById('login-form').style.display = 'none';
-        return;
-    }
-
-    // load data
-    const data = JSON.parse(offlineData);
-    users = data.users || [];
-    unitNames = data.unitNames || [];
-    prices = data.prices || {};
-    logs = data.logs || [];
-    queue = data.queue || [];
-    endTimes = data.endTimes || {};
-    startTimes = data.startTimes || {};
-    isPaused = data.isPaused || {};
-    isPaid = data.isPaid || {};
-    activeUsers = data.activeUsers || {};
-    activeDurations = data.activeDurations || {};
-    activeStaff = data.activeStaff || {};
-    activeTransferInfo = data.activeTransferInfo || {};
-
-    // load user
-    currentUser = JSON.parse(savedUser);
-
-    // 🚪 PAKSA MASUK APP
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('current-user-display').innerText =
-        "Aktif (Offline): " + currentUser.user;
-
-    applyPermissions();
-    initDashboard();
-    renderQueue();
-    renderLogs();
-    renderUserList();
-}
-      
-      
     const offlineData = localStorage.getItem('offline_backup');
 
 if (offlineData) {
@@ -344,9 +300,11 @@ activeTransferInfo = data.activeTransferInfo || {};
 console.log('📦 Data dimuat dari local backup');
 
 
-if (!navigator.onLine) {
-    console.log("📴 Reload offline → force bootstrap");
-    forceOfflineBootstrap();
+
+if (!navigator.onLine && offlineData) {  
+initOfflineApp();  
+bootstrapApp();
+
 }
 
 let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';  
@@ -426,7 +384,7 @@ activeStaff = data.activeStaff || {};
 activeTransferInfo = data.activeTransferInfo || {};
 
 console.log('✅ Offline Data Loaded');  
-    
+    bootstrapApp(); // 
 }
 
 }
@@ -513,31 +471,9 @@ _lastUpdate: Date.now()
 localStorage.setItem('offline_backup', JSON.stringify(payload));
 }
 
-function attemptLogin() {  
-const u = document.getElementById('user-input').value;  
-const p = document.getElementById('pass-input').value;  
-const userFound = users.find(x => x.user === u && x.pass === p);  
 
-if (userFound) {  
-    currentUser = userFound;  
 
-    // 🔐 SIMPAN SESSION LOGIN  
-    localStorage.setItem('currentUser', JSON.stringify(userFound));  
-
-    document.getElementById('login-overlay').style.display = 'none';  
-    document.getElementById('app').style.display = 'block';  
-    document.getElementById('current-user-display').innerText = "Aktif: " + currentUser.user;  
-
-    applyPermissions();  
-    initDashboard();  
-    renderQueue();  
-    renderLogs();  
-    renderUserList();  
-} else {  
-    document.getElementById('login-err').style.display = 'block';  
-}
-
-}function attemptLogin() {
+function attemptLogin() {
 if (!navigator.onLine) {
 alert("Login pertama harus online");
 return;
@@ -1132,4 +1068,4 @@ function speakExpiredUnits() {
 }  
   
 </script>  </body>  
-</html> 
+</html>  
