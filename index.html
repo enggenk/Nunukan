@@ -334,26 +334,34 @@ if (offlineData) {
 }
 
         function initOfflineApp() {
-    console.log('⚡ Bootstrapping OFFLINE UI');
-
-    document.getElementById('loading-text').style.display = 'none';
-    document.getElementById('login-form').style.display = 'block';
+    console.log('⚡ OFFLINE MODE');
 
     const savedUser = localStorage.getItem('currentUser');
-    if (!savedUser) return;
 
-    currentUser = JSON.parse(savedUser);
+    // ❌ JANGAN tampilkan form login
+    document.getElementById('loading-text').innerText =
+        "Mode Offline Aktif";
 
-    document.getElementById('login-overlay').style.display = 'none';
-    document.getElementById('app').style.display = 'block';
-    document.getElementById('current-user-display').innerText =
-        "Aktif: " + currentUser.user;
+    // ✅ Jika ada session → langsung masuk
+    if (savedUser) {
+        currentUser = JSON.parse(savedUser);
 
-    applyPermissions();
-    initDashboard();
-    renderQueue();
-    renderLogs();
-    renderUserList();
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
+        document.getElementById('current-user-display').innerText =
+            "Aktif (Offline): " + currentUser.user;
+
+        applyPermissions();
+        initDashboard();
+        renderQueue();
+        renderLogs();
+        renderUserList();
+    } else {
+        // ❗ Jika BELUM PERNAH LOGIN & offline → BLOCK
+        document.getElementById('login-form').style.display = 'none';
+        document.getElementById('loading-text').innerText =
+            "Offline — login pertama wajib online";
+    }
 }
 
         let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;
@@ -435,6 +443,32 @@ function saveLocalBackup() {
         document.getElementById('login-overlay').style.display = 'none';
         document.getElementById('app').style.display = 'block';
         document.getElementById('current-user-display').innerText = "Aktif: " + currentUser.user;
+
+        applyPermissions();
+        initDashboard();
+        renderQueue();
+        renderLogs();
+        renderUserList();
+    } else {
+        document.getElementById('login-err').style.display = 'block';
+    }
+}function attemptLogin() {
+    if (!navigator.onLine) {
+        alert("Login pertama harus online");
+        return;
+    }
+
+    const u = document.getElementById('user-input').value;
+    const p = document.getElementById('pass-input').value;
+
+    const userFound = users.find(x => x.user === u && x.pass === p);
+
+    if (userFound) {
+        currentUser = userFound;
+        localStorage.setItem('currentUser', JSON.stringify(userFound));
+
+        document.getElementById('login-overlay').style.display = 'none';
+        document.getElementById('app').style.display = 'block';
 
         applyPermissions();
         initDashboard();
