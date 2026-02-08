@@ -1,4 +1,4 @@
-const CACHE_NAME = 'ysa-sinjai-offline-v3'; // Ganti versi jika ada update besar
+const CACHE_NAME = 'ysa-sinjai-offline-v3.1.1'; // Ganti versi jika ada update besar
 const urlsToCache = [
   './',
   './index.html',
