@@ -190,30 +190,65 @@
 
     <div id="view-reports" class="view-section">  
         <div class="admin-card" style="background: linear-gradient(135deg, var(--primary), #900); color: white; text-align:center; border:none;">  
-            <p style="margin:0; opacity:0.8; font-family:'Orbitron'; font-size:0.7rem;" id="income-label">TOTAL REVENUE (ALL SESSIONS)</p>  
-            <h1 id="total-income" style="margin:10px 0; font-size:2.2rem; font-family:'Orbitron';">Rp 0</h1>  
-            <div style="background: rgba(0,0,0,0.3); border-radius: 5px; padding: 8px; margin-top: 5px;">  
-                <small style="font-family:'Orbitron';">COMPLETED LAPS: <b id="total-usage" style="color:var(--success)">0</b></small>  
+            <p style="margin:0; opacity:0.8; font-family:'Orbitron'; font-size:0.7rem;">SALDO BERSIH (CASH ON HAND)</p>  
+            <h1 id="net-income" style="margin:10px 0; font-size:2.2rem; font-family:'Orbitron';">Rp 0</h1>  
+            
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; background: rgba(0,0,0,0.3); border-radius: 5px; padding: 8px; margin-top: 5px;">  
+                <div style="text-align:center; border-right:1px solid rgba(255,255,255,0.2)">
+                    <small style="font-family:'Orbitron'; display:block; font-size:0.6rem">PEMASUKAN</small>
+                    <b id="total-income-gross" style="color:var(--success); font-family:'Orbitron';">Rp 0</b>
+                </div>
+                <div style="text-align:center;">
+                    <small style="font-family:'Orbitron'; display:block; font-size:0.6rem">PENGELUARAN</small>
+                    <b id="total-expense-display" style="color:#ffcccb; font-family:'Orbitron';">Rp 0</b>
+                </div>
             </div>  
         </div>  
-        <div class="filter-bar">  
-            <button class="filter-btn active" onclick="setReportFilter('all', this)">ALL</button>  
-            <button class="filter-btn" onclick="setReportFilter('daily', this)">TODAY</button>  
-            <button class="filter-btn" onclick="setReportFilter('weekly', this)">WEEK</button>  
-            <button class="filter-btn" onclick="setReportFilter('monthly', this)">MONTH</button>  
-        </div>  
-        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">  
-            <h3 style="margin:0; font-family:'Orbitron'; font-size:0.9rem;">TELEMETRY HISTORY</h3>  
-            <button class="restrict-admin" onclick="clearAllLogs()" style="background:var(--danger); color:white; padding:5px 12px; border-radius:3px; font-size:0.6rem; font-family:'Orbitron';">WIPE DATA</button>  
-        </div>  
-<div class="admin-card" style="padding:0; overflow-x:auto; background:transparent; border:none;">  
-    <table style="width: 100%; border-collapse: separate; border-spacing: 0 5px;">  
-        <tbody id="log-body">
-            </tbody>  
-    </table>  
-</div>
-    </div>  
 
+        <div class="filter-bar" style="margin-bottom: 10px;">
+            <button class="filter-btn active" id="tab-income" onclick="switchReportTab('income')">PEMASUKAN (LOGS)</button>
+            <button class="filter-btn" id="tab-expense" onclick="switchReportTab('expense')">PENGELUARAN</button>
+        </div>
+
+        <div id="report-income-section">
+            <div class="filter-bar">  
+                <button class="filter-btn active" onclick="setReportFilter('all', this)">ALL</button>  
+                <button class="filter-btn" onclick="setReportFilter('daily', this)">TODAY</button>  
+                <button class="filter-btn" onclick="setReportFilter('weekly', this)">WEEK</button>  
+                <button class="filter-btn" onclick="setReportFilter('monthly', this)">MONTH</button>  
+            </div>  
+            
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">  
+                <h3 style="margin:0; font-family:'Orbitron'; font-size:0.9rem;">TELEMETRY HISTORY</h3>  
+                <button class="restrict-admin" onclick="clearAllLogs()" style="background:var(--danger); color:white; padding:5px 12px; border-radius:3px; font-size:0.6rem; font-family:'Orbitron';">WIPE DATA</button>  
+            </div>  
+            
+            <div class="admin-card" style="padding:0; overflow-x:auto; background:transparent; border:none;">  
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0 5px;">  
+                    <tbody id="log-body"></tbody>  
+                </table>  
+            </div>
+        </div>
+
+        <div id="report-expense-section" style="display:none;">
+            <div class="admin-card">
+                <h3 style="font-family:'Orbitron'; color:var(--primary); margin-top:0;">CATAT PENGELUARAN</h3>
+                <input type="text" id="exp-desc" placeholder="KETERANGAN (Cth: Beli Bensin, Token, Makan)">
+                <input type="number" id="exp-amount" placeholder="JUMLAH (Rp)">
+                <button onclick="addExpense()" class="btn-main" style="background:var(--warning); color:#000; margin-top:5px;">SIMPAN PENGELUARAN</button>
+            </div>
+
+            <h3 style="margin:15px 0 5px; font-family:'Orbitron'; font-size:0.9rem;">RIWAYAT PENGELUARAN</h3>
+            <div class="admin-card" style="padding:0; overflow-x:auto; background:transparent; border:none;">
+                <table style="width: 100%; border-collapse: separate; border-spacing: 0 5px;">
+                    <thead style="text-align:left; color:#888; font-size:0.7rem;">
+                        <tr><th style="padding:5px">KET</th><th>JML</th><th>OPS</th></tr>
+                    </thead>
+                    <tbody id="expense-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>  
     <div id="view-admin" class="view-section">  
         <div class="admin-card restrict-admin">  
             <h3 style="font-family:'Orbitron'; color:var(--primary);">👥 TEAM PERSONNEL</h3>  
@@ -318,8 +353,8 @@ const firebaseConfig = {
 firebase.initializeApp(firebaseConfig);
 const db = firebase.database();
 
-let users = [], unitNames = [], prices = {}, logs = [], queue = [];  
-    let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};  
+let users = [], unitNames = [], prices = {}, logs = [], queue = [], expenses = []; // expenses ditambahkan
+let endTimes = {}, startTimes = {}, isPaused = {}, isPaid = {}, activeUsers = {}, activeDurations = {}, activeStaff = {}, activeTransferInfo = {};  
       
     const offlineData = localStorage.getItem('offline_backup');
 
@@ -363,6 +398,70 @@ renderLogs();
 renderUserList();
 }
 
+
+
+    // --- FITUR PENGELUARAN & LAPORAN ---
+
+    function switchReportTab(tab) {
+        document.getElementById('report-income-section').style.display = tab === 'income' ? 'block' : 'none';
+        document.getElementById('report-expense-section').style.display = tab === 'expense' ? 'block' : 'none';
+        
+        document.getElementById('tab-income').className = tab === 'income' ? 'filter-btn active' : 'filter-btn';
+        document.getElementById('tab-expense').className = tab === 'expense' ? 'filter-btn active' : 'filter-btn';
+        
+        if(tab === 'expense') renderExpenses();
+    }
+
+    function addExpense() {
+        const desc = document.getElementById('exp-desc').value;
+        const amount = parseInt(document.getElementById('exp-amount').value);
+
+        if(!desc || !amount) { alert("Isi keterangan dan jumlah!"); return; }
+
+        expenses.unshift({
+            desc: desc,
+            amount: amount,
+            date: Date.now(),
+            staff: currentUser ? currentUser.user : 'Unknown'
+        });
+
+        document.getElementById('exp-desc').value = "";
+        document.getElementById('exp-amount').value = "";
+        
+        saveAppState();
+        renderExpenses();
+        renderLogs(); // Update total saldo di atas
+    }
+
+    function renderExpenses() {
+        const tbody = document.getElementById('expense-body');
+        tbody.innerHTML = expenses.map((exp, i) => `
+            <tr style="border-bottom:1px solid #333;">
+                <td style="text-align:left; padding:10px;">
+                    <b style="color:#eee;">${exp.desc}</b><br>
+                    <small style="color:#666;">${new Date(exp.date).toLocaleDateString('id-ID')} - ${exp.staff}</small>
+                </td>
+                <td style="color:var(--danger); font-family:'Orbitron';">
+                    -Rp ${exp.amount.toLocaleString()}
+                </td>
+                <td>
+                    <button onclick="deleteExpense(${i})" style="background:none; color:#666; font-size:0.8rem;">✖</button>
+                </td>
+            </tr>
+        `).join("");
+    }
+
+    function deleteExpense(i) {
+        if(confirm("Hapus catatan pengeluaran ini?")) {
+            expenses.splice(i, 1);
+            saveAppState();
+            renderExpenses();
+            renderLogs();
+        }
+    }
+
+
+
 function initOfflineApp() {  
     const savedUser = localStorage.getItem('currentUser');  
     if (savedUser) {  
@@ -390,6 +489,7 @@ unitNames = data.unitNames || data.units || unitNames;
 prices = data.prices || prices;
 logs = data.logs || [];
 queue = data.queue || [];
+expenses = data.expenses || [];
 endTimes = data.endTimes || {};
 startTimes = data.startTimes || {};
 isPaused = data.isPaused || {};
@@ -412,6 +512,7 @@ unitNames = data.units || unitNames;
 prices = data.prices || prices;  
 logs = data.logs || [];  
 queue = data.queue || [];  
+expenses = data.expenses || [];
 endTimes = data.endTimes || {};  
 startTimes = data.startTimes || {};   
 isPaused = data.isPaused || {};  
@@ -438,12 +539,12 @@ saveLocalBackup();
 });
 
 function saveAppState() {  
-const data = {  
-    users, units: unitNames, prices, logs, queue,  
-    endTimes, startTimes, isPaused, isPaid,  
-    activeUsers, activeDurations, activeStaff, activeTransferInfo,  
-    _updatedAt: Date.now()  
-};  
+    const data = {  
+        users, units: unitNames, prices, logs, queue, expenses, // TAMBAHKAN expenses DI SINI
+        endTimes, startTimes, isPaused, isPaid,  
+        activeUsers, activeDurations, activeStaff, activeTransferInfo,  
+        _updatedAt: Date.now()  
+    };  
 localStorage.setItem('offline_backup', JSON.stringify(data));  
 db.ref('app_data').update(data)  
     .then(() => { localStorage.removeItem('pending_sync'); })  
@@ -453,13 +554,13 @@ db.ref('app_data').update(data)
 function handleSyncFailure() { localStorage.setItem('pending_sync', 'true'); }
 
 function saveLocalBackup() {
-const payload = {
-users, unitNames, prices, logs, queue,
-endTimes, startTimes, isPaused, isPaid,
-activeUsers, activeDurations, activeStaff, activeTransferInfo,
-_lastUpdate: Date.now()
-};
-localStorage.setItem('offline_backup', JSON.stringify(payload));
+    const payload = {
+        users, unitNames, prices, logs, queue, expenses, // TAMBAHKAN expenses DI SINI
+        endTimes, startTimes, isPaused, isPaid,
+        activeUsers, activeDurations, activeStaff, activeTransferInfo,
+        _lastUpdate: Date.now()
+    };
+    localStorage.setItem('offline_backup', JSON.stringify(payload));
 }
 
 function attemptLogin() {
@@ -740,69 +841,87 @@ switchView('units', document.querySelectorAll('.nav-item')[0]);
 }
 
 function renderLogs() {  
-    const now = new Date();  
-    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();  
-    const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);  
-    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();  
-    const isAdmin = currentUser && currentUser.role === 'admin';  
-      
-    let filtered = logs.filter(l => {  
-        if (currentReportFilter === 'daily') return l.end >= startOfDay;  
-        if (currentReportFilter === 'weekly') return l.end >= startOfWeek;  
-        if (currentReportFilter === 'monthly') return l.end >= startOfMonth;  
-        return true;  
-    });  
+        const now = new Date();  
+        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();  
+        const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);  
+        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();  
+        const isAdmin = currentUser && currentUser.role === 'admin';  
+          
+        // Filter Logs (Pemasukan)
+        let filteredLogs = logs.filter(l => {  
+            if (currentReportFilter === 'daily') return l.end >= startOfDay;  
+            if (currentReportFilter === 'weekly') return l.end >= startOfWeek;  
+            if (currentReportFilter === 'monthly') return l.end >= startOfMonth;  
+            return true;  
+        });  
 
-    // Update Header Revenue
-    const total = filtered.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);  
-    document.getElementById('total-income').innerText = "Rp " + total.toLocaleString();  
-    document.getElementById('total-usage').innerText = filtered.length;  
+        // Filter Expenses (Pengeluaran) - Mengikuti filter waktu yang sama
+        let filteredExpenses = expenses.filter(e => {
+            if (currentReportFilter === 'daily') return e.date >= startOfDay;
+            if (currentReportFilter === 'weekly') return e.date >= startOfWeek;
+            if (currentReportFilter === 'monthly') return e.date >= startOfMonth;
+            return true;
+        });
 
-    // Pengelompokan Data Berdasarkan Tanggal
-    const groups = filtered.reduce((acc, log) => {
-        const dateKey = new Date(log.end).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
-        if (!acc[dateKey]) acc[dateKey] = { logs: [], dailyTotal: 0 };
-        acc[dateKey].logs.push(log);
-        if (log.paid) acc[dateKey].dailyTotal += parseInt(log.cost || 0);
-        return acc;
-    }, {});
+        // 1. Hitung Total Pemasukan (Gross)
+        const totalGross = filteredLogs.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);
+        
+        // 2. Hitung Total Pengeluaran
+        const totalExp = filteredExpenses.reduce((sum, item) => sum + parseInt(item.amount), 0);
 
-    let html = "";
-    Object.keys(groups).forEach((date, index) => {
-        const group = groups[date];
-        // Baris Header Tanggal (Klik untuk buka detail)
-        html += `
-            <tr onclick="toggleGroup(${index})" style="background: #2c2c35; cursor: pointer; border-left: 4px solid var(--primary);">
-                <td colspan="4" style="text-align: left; padding: 12px; font-weight: bold; font-family: 'Orbitron'; font-size: 0.8rem;">
-                    📅 ${date} <span style="color: var(--success); margin-left:10px;">(Rp ${group.dailyTotal.toLocaleString()})</span>
-                </td>
-                <td colspan="3" style="text-align: right; padding-right: 15px; color: #888;">${group.logs.length} Laps ▾</td>
-            </tr>
-            <tr id="group-${index}" style="display: none; background: #15151e;">
-                <td colspan="7" style="padding: 0;">
-                    <table style="width: 100%; font-size: 0.7rem; border-top: 1px solid #333;">
-                        <tr style="color: var(--primary); font-weight: bold; background: #1a1a24;">
-                            <td style="padding: 8px;">UNIT</td><td>JAM</td><td>DUR</td><td>BIAYA</td><td>CREW</td><td>OPS</td>
-                        </tr>
-                        ${group.logs.map((l, logIdx) => `
-                            <tr style="border-bottom: 1px solid #222;">
-                                <td style="padding: 8px;"><b>${l.unit}</b></td>
-                                <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
-                                <td>${l.dur}m</td>
-                                <td style="color:var(--success)">${parseInt(l.cost || 0).toLocaleString()}</td>
-                                <td>${l.staff}</td>
-                                <td>${isAdmin ? `<button onclick="deleteLogWithConfirm(${logs.indexOf(l)})" style="background:none; color:var(--danger); border:none; padding:0;">🗑️</button>` : '✔'}</td>
+        // 3. Hitung Bersih
+        const netIncome = totalGross - totalExp;
+
+        // Update UI Angka Besar
+        if(document.getElementById('net-income')) {
+            document.getElementById('net-income').innerText = "Rp " + netIncome.toLocaleString();  
+            document.getElementById('total-income-gross').innerText = "Rp " + totalGross.toLocaleString();
+            document.getElementById('total-expense-display').innerText = "Rp " + totalExp.toLocaleString();
+        }
+
+        // --- Render Tabel Logs (Sama seperti sebelumnya) ---
+        const groups = filteredLogs.reduce((acc, log) => {
+            const dateKey = new Date(log.end).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+            if (!acc[dateKey]) acc[dateKey] = { logs: [], dailyTotal: 0 };
+            acc[dateKey].logs.push(log);
+            if (log.paid) acc[dateKey].dailyTotal += parseInt(log.cost || 0);
+            return acc;
+        }, {});
+
+        let html = "";
+        Object.keys(groups).forEach((date, index) => {
+            const group = groups[date];
+            html += `
+                <tr onclick="toggleGroup(${index})" style="background: #2c2c35; cursor: pointer; border-left: 4px solid var(--primary);">
+                    <td colspan="4" style="text-align: left; padding: 12px; font-weight: bold; font-family: 'Orbitron'; font-size: 0.8rem;">
+                        📅 ${date} <span style="color: var(--success); margin-left:10px;">(Rp ${group.dailyTotal.toLocaleString()})</span>
+                    </td>
+                    <td colspan="3" style="text-align: right; padding-right: 15px; color: #888;">${group.logs.length} Laps ▾</td>
+                </tr>
+                <tr id="group-${index}" style="display: none; background: #15151e;">
+                    <td colspan="7" style="padding: 0;">
+                        <table style="width: 100%; font-size: 0.7rem; border-top: 1px solid #333;">
+                            <tr style="color: var(--primary); font-weight: bold; background: #1a1a24;">
+                                <td style="padding: 8px;">UNIT</td><td>JAM</td><td>DUR</td><td>BIAYA</td><td>CREW</td><td>OPS</td>
                             </tr>
-                        `).join('')}
-                    </table>
-                </td>
-            </tr>
-        `;
-    });
+                            ${group.logs.map((l, logIdx) => `
+                                <tr style="border-bottom: 1px solid #222;">
+                                    <td style="padding: 8px;"><b>${l.unit}</b></td>
+                                    <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
+                                    <td>${l.dur}m</td>
+                                    <td style="color:var(--success)">${parseInt(l.cost || 0).toLocaleString()}</td>
+                                    <td>${l.staff}</td>
+                                    <td>${isAdmin ? `<button onclick="deleteLogWithConfirm(${logs.indexOf(l)})" style="background:none; color:var(--danger); border:none; padding:0;">🗑️</button>` : '✔'}</td>
+                                </tr>
+                            `).join('')}
+                        </table>
+                    </td>
+                </tr>
+            `;
+        });
 
-    document.getElementById('log-body').innerHTML = html || "<tr><td colspan='7' style='padding:20px; color:#888;'>TIDAK ADA DATA TELEMETRY</td></tr>";  
-}
-
+        document.getElementById('log-body').innerHTML = html || "<tr><td colspan='7' style='padding:20px; color:#888;'>TIDAK ADA DATA TELEMETRY</td></tr>";  
+    }
 // Fungsi Helper untuk Toggle Detail
 function toggleGroup(id) {
     const el = document.getElementById(`group-${id}`);
