@@ -102,6 +102,27 @@
     ::-webkit-scrollbar { width: 5px; }
     ::-webkit-scrollbar-track { background: #111; }
     ::-webkit-scrollbar-thumb { background: var(--primary); }
+    <style> */
+#unit-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 15px;
+}
+
+.card {
+    flex: 1 1 calc(50% - 15px); /* Tetap 2 kolom di mobile */
+    order: 2; /* Default posisi bawah */
+}
+
+.card.active-run {
+    order: 1 !important; /* Paksa naik ke atas jika aktif */
+    border-left: 4px solid var(--success);
+    background: linear-gradient(145deg, #1f1f27, #252530);
+}
+
+.card.expired {
+    order: 0 !important; /* Unit yang habis waktunya paling atas sendiri */
+}
 </style>
 
 </head>  
@@ -629,6 +650,7 @@ function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeM
         activeDurations[i] = dur; activeStaff[i] = currentUser.user;   
         delete activeTransferInfo[i];  
         warningPlayed[i] = false;   
+        document.getElementById(`card-${i}`).classList.add('active-run');
         saveAppState();  
     }  
 
@@ -670,6 +692,8 @@ clearInterval(timers[i]);
 delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];  
 delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];  
 delete isPaid[i]; delete activeTransferInfo[i];  
+const card = document.getElementById(`card-${i}`);
+    card.classList.remove('active-run', 'expired', 'pin-top');
 saveAppState(); closeStopModal();
 }
 
