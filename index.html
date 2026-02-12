@@ -2,83 +2,106 @@
 <head>  
  <meta charset="UTF-8">  
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">  
-    <title>YSA021 Sinjai</title>  <meta name="mobile-web-app-capable" content="yes">  
+    <title>F1 Race Control - Sinjai</title>  <meta name="mobile-web-app-capable" content="yes">  
 <meta name="apple-mobile-web-app-capable" content="yes">  
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
 <meta name="apple-mobile-web-app-title" content="Sinjai Timer">
 
 <link rel="icon" type="image/png" sizes="192x192" href="https://enggenk.github.io/Sinjai/logo-512.png">  
-<link rel="apple-touch-icon" href="https://enggenk.github.io/Sinjai/logo-512.png">  <link rel="manifest" href="manifest.json">  <meta name="theme-color" content="#6366f1">  
+<link rel="apple-touch-icon" href="https://enggenk.github.io/Sinjai/logo-512.png">  <link rel="manifest" href="manifest.json">  <meta name="theme-color" content="#e10600">  
 <meta name="mobile-web-app-capable" content="yes">  
 <meta name="apple-mobile-web-app-capable" content="yes">  <style>  
+    @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Condensed:wght@400;700&display=swap');
+
     :root {   
-        --bg: linear-gradient(135deg, #e0f2fe 0%, #fef2f2 100%);   
-        --primary: #1e293b;   
-        --success: #10b981;   
-        --danger: #ef4444;   
-        --accent: #6366f1;   
+        --bg: #0b0b0b;   
+        --primary: #e10600; /* F1 Red */  
+        --success: #00d2be; /* Mercedes Teal */  
+        --danger: #ff1801;   
+        --accent: #15151e;   
         --warning: #f59e0b;   
-        --card-bg: rgba(255, 255, 255, 0.9);  
+        --card-bg: #1f1f27;  
+        --text-light: #ffffff;
     }  
 
     body {   
-        font-family: 'Poppins', 'Segoe UI', sans-serif;   
+        font-family: 'Roboto Condensed', sans-serif;   
         background: var(--bg);   
+        background-image: radial-gradient(circle at 20% 20%, #2c2c2c 0%, #0b0b0b 100%);
         background-attachment: fixed;  
         margin: 0;   
         padding-bottom: 100px;   
-        color: var(--primary);   
+        color: var(--text-light);   
         user-select: none;  
     }  
 
-    .taskbar { position: fixed; bottom: 15px; left: 15px; right: 15px; background: rgba(255, 255, 255, 0.85); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 12px; border-radius: 25px; z-index: 1000; box-shadow: 0 8px 32px rgba(31, 38, 135, 0.15); border: 1px solid rgba(255, 255, 255, 0.18); }  
-    .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: #94a3b8; font-size: 0.7rem; font-weight: 700; border: none; background: none; transition: 0.3s; flex: 1; }  
-    .nav-item.active { color: var(--accent); transform: translateY(-5px); }  
-    .nav-item span { font-size: 1.5rem; margin-bottom: 4px; }  
+    .taskbar { position: fixed; bottom: 0; left: 0; right: 0; background: rgba(21, 21, 30, 0.95); backdrop-filter: blur(10px); display: flex; justify-content: space-around; padding: 10px 5px 25px; z-index: 1000; border-top: 3px solid var(--primary); }  
+    .nav-item { display: flex; flex-direction: column; align-items: center; cursor: pointer; color: #888; font-size: 0.7rem; font-weight: 700; border: none; background: none; transition: 0.3s; flex: 1; font-family: 'Orbitron', sans-serif; }  
+    .nav-item.active { color: var(--primary); transform: scale(1.1); }  
+    .nav-item span { font-size: 1.4rem; margin-bottom: 4px; }  
       
-    #login-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; z-index: 2000; }  
-    .login-box { background: white; padding: 40px 30px; border-radius: 30px; width: 85%; max-width: 400px; text-align: center; box-shadow: 0 20px 40px rgba(0,0,0,0.3); border: 2px solid var(--accent); }  
+    #login-overlay { position: fixed; inset: 0; background: #000; display: flex; align-items: center; justify-content: center; z-index: 2000; }  
+    .login-box { background: var(--card-bg); padding: 40px 30px; border-radius: 10px; width: 85%; max-width: 400px; text-align: center; border-bottom: 5px solid var(--primary); box-shadow: 0 0 30px rgba(225, 6, 0, 0.3); }  
       
-    .view-section { display: none; padding: 20px; animation: slideUp 0.4s ease-out; }  
+    .view-section { display: none; padding: 20px; animation: raceIn 0.3s ease-out; }  
     .view-section.active { display: block; }  
-    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }  
+    @keyframes raceIn { from { opacity: 0; transform: translateX(50px); } to { opacity: 1; transform: translateX(0); } }  
       
     .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }  
-    .card { background: var(--card-bg); border-radius: 20px; padding: 18px; text-align: center; box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); transition: 0.3s; border: 1px solid rgba(255, 255, 255, 0.3); position: relative; display: flex; flex-direction: column; justify-content: space-between; min-height: 220px; order: 2; }  
-    .card.active-run { background: #ecfdf5; border: 2px solid var(--success); order: 1; }  
-    .card.warning-near { border: 2px solid var(--warning); background: #fffbeb; animation: pulse-warning 1s infinite; }  
-    .card.expired { border: 2px solid var(--danger); background: #fef2f2; animation: blink-border 0.8s infinite; }  
+    .card { 
+        background: var(--card-bg); 
+        border-radius: 5px; 
+        padding: 15px; 
+        box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+        border-left: 4px solid #444; 
+        position: relative; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: space-between; 
+        min-height: 200px; 
+        transition: 0.2s;
+    }  
+    .card.active-run { border-left: 4px solid var(--success); background: linear-gradient(145deg, #1f1f27, #252530); }  
+    .card.warning-near { border-left: 4px solid var(--warning); animation: pulse-warning 1s infinite; }  
+    .card.expired { border-left: 4px solid var(--danger); background: #301010; animation: blink-f1 0.5s infinite; }  
       
-    .timer-display { font-size: 2.2rem; font-weight: 900; margin: 10px 0; font-family: 'Courier New', monospace; color: var(--primary); }  
-    .user-tag { font-size: 0.8rem; color: var(--accent); font-weight: bold; background: #e0e7ff; padding: 2px 8px; border-radius: 10px; display: inline-block; margin-bottom: 5px; min-height: 18px; }  
-    .transfer-tag { font-size: 0.6rem; color: #ef4444; font-weight: bold; margin-bottom: 5px; font-style: italic; }  
-    .staff-badge { font-size: 0.65rem; color: #64748b; margin-top: 5px; font-style: italic; }  
+    .timer-display { font-family: 'Orbitron', sans-serif; font-size: 2rem; font-weight: 900; margin: 10px 0; color: var(--success); text-shadow: 0 0 10px rgba(0, 210, 190, 0.4); }  
+    .expired .timer-display { color: var(--danger); }
+
+    .user-tag { font-size: 0.75rem; color: #fff; font-weight: bold; background: var(--primary); padding: 2px 8px; border-radius: 3px; display: inline-block; margin-bottom: 5px; text-transform: uppercase; letter-spacing: 1px; }  
+    .transfer-tag { font-size: 0.6rem; color: #aaa; margin-bottom: 5px; font-style: italic; }  
+    .staff-badge { font-size: 0.6rem; color: #666; margin-top: 5px; text-transform: uppercase; }  
       
-    input, select { width: 100%; padding: 14px; margin: 8px 0; border: 2px solid #e2e8f0; border-radius: 15px; outline: none; box-sizing: border-box; }  
-    button { border: none; padding: 12px; border-radius: 15px; font-weight: 800; cursor: pointer; transition: 0.2s; }  
-    .btn-main { background: var(--accent); color: white; width: 100%; }  
+    input, select { background: #2c2c35; border: 1px solid #444; color: white; width: 100%; padding: 12px; margin: 8px 0; border-radius: 5px; font-family: 'Roboto Condensed', sans-serif; }  
+    button { border: none; padding: 12px; border-radius: 4px; font-weight: 800; cursor: pointer; transition: 0.2s; font-family: 'Orbitron', sans-serif; text-transform: uppercase; letter-spacing: 1px; }  
+    .btn-main { background: var(--primary); color: white; width: 100%; box-shadow: 0 4px 0 #900; }  
+    .btn-main:active { transform: translateY(2px); box-shadow: 0 2px 0 #900; }
       
-    .filter-bar { display: flex; gap: 5px; margin-bottom: 15px; background: white; padding: 5px; border-radius: 15px; overflow-x: auto; }  
-    .filter-btn { flex: 1; padding: 8px 5px; font-size: 0.65rem; background: transparent; color: #64748b; border-radius: 10px; }  
-    .filter-btn.active { background: var(--accent); color: white; }  
+    .filter-bar { display: flex; gap: 5px; margin-bottom: 15px; background: #15151e; padding: 5px; border-radius: 5px; }  
+    .filter-btn { flex: 1; padding: 8px 5px; font-size: 0.65rem; background: transparent; color: #888; }  
+    .filter-btn.active { background: var(--primary); color: white; border-radius: 3px; }  
       
-    .admin-card { background: white; padding: 20px; border-radius: 20px; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }  
+    .admin-card { background: var(--card-bg); padding: 15px; border-radius: 5px; margin-bottom: 15px; border: 1px solid #333; }  
     table { width: 100%; border-collapse: collapse; }  
-    th, td { padding: 12px 8px; text-align: center; border-bottom: 1px solid #f1f5f9; font-size: 0.8rem; }  
+    th { color: var(--primary); font-family: 'Orbitron'; font-size: 0.6rem; text-transform: uppercase; padding: 10px 5px; border-bottom: 2px solid #333; }
+    td { padding: 12px 5px; text-align: center; border-bottom: 1px solid #222; font-size: 0.75rem; }  
       
-    .modal-overlay { position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(5px); display: flex; align-items: center; justify-content: center; z-index: 2000; }  
-    .modal-box { background: white; padding: 30px; border-radius: 30px; width: 85%; max-width: 400px; text-align: center; }  
-    .q-badge { font-size: 0.65rem; padding: 4px 8px; border-radius: 8px; cursor: pointer; font-weight: bold; }  
-    .q-paid { background: #dcfce7; color: #166534; }  
-    .q-unpaid { background: #fee2e2; color: #991b1b; }  
-
-    @keyframes pulse-warning { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }  
-    @keyframes blink-border { 0% { border-color: var(--danger); } 50% { border-color: transparent; } 100% { border-color: var(--danger); } }
-
-/* 🔝 Kartu dipertahankan di posisi paling atas */
-.card.pin-top {
-order: 0 !important;
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; z-index: 2000; }  
+    .modal-box { background: var(--card-bg); padding: 30px; border-radius: 10px; width: 85%; max-width: 400px; text-align: center; border: 1px solid #444; }  
+    @keyframes blink-red {
+    0% { opacity: 1; }
+    50% { opacity: 0.2; }
+    100% { opacity: 1; }
 }
+    @keyframes pulse-warning { 0% { background: var(--card-bg); } 50% { background: #332b10; } 100% { background: var(--card-bg); } }  
+    @keyframes blink-f1 { 0% { opacity: 1; } 50% { opacity: 0.7; } 100% { opacity: 1; } }
+
+    .card.pin-top { order: 0 !important; border-left-width: 8px; }
+
+    /* Custom Scrollbar for F1 look */
+    ::-webkit-scrollbar { width: 5px; }
+    ::-webkit-scrollbar-track { background: #111; }
+    ::-webkit-scrollbar-thumb { background: var(--primary); }
 </style>
 
 </head>  
@@ -87,84 +110,85 @@ order: 0 !important;
 
 <div id="login-overlay">  
     <div class="login-box">  
-        <span style="font-size:4rem">🏎️</span>  
-        <h1 style="margin: 0 0 20px 0; color: var(--primary);">YSA021 Sinjai</h1>  
-        <div id="loading-text">Menghubungkan ke Server...</div>  
+        <div style="font-size:3rem; font-weight:900; color:var(--primary); font-family:'Orbitron';">F1</div>  
+        <h2 style="margin: 0 0 20px 0; color: #fff; font-family:'Orbitron';">RACE CONTROL</h2>  
+        <div id="loading-text" style="color:var(--success); font-family:monospace;">INITIALIZING TELEMETRY...</div>  
         <div id="login-form" style="display:none;">  
-            <input type="text" id="user-input" placeholder="Username">  
-            <input type="password" id="pass-input" placeholder="Password">  
-            <button onclick="attemptLogin()" class="btn-main" style="margin-top:10px">MASUK SISTEM</button>  
-            <p id="login-err" style="color:var(--danger); font-size:0.8rem; margin-top:10px; display:none;">Akses Ditolak!</p>  
+            <input type="text" id="user-input" placeholder="DRIVER USERNAME">  
+            <input type="password" id="pass-input" placeholder="ACCESS KEY">  
+            <button onclick="attemptLogin()" class="btn-main" style="margin-top:10px">ENGAGE SYSTEM</button>  
+            <p id="login-err" style="color:var(--danger); font-size:0.8rem; margin-top:10px; display:none;">ACCESS DENIED: WRONG KEY!</p>  
         </div>  
     </div>  
 </div>  
 
 <div id="app" style="display:none;">  
-<div id="offline-banner" style="display:none; background: #ef4444; color: white; text-align: center; padding: 8px; font-size: 0.8rem; font-weight: bold; position: sticky; top: 0; z-index: 2001;">
-    ⚠️ Jaringan bermasalah! JANGAN RELOAD BOSCU / JANGAN KI SCROLL KEBAWAH INI APLIKASI DULU NAHH!! 
+<div id="offline-banner" style="display:none; background: var(--danger); color: white; text-align: center; padding: 8px; font-size: 0.7rem; font-weight: bold; position: sticky; top: 0; z-index: 2001; font-family:'Orbitron';">
+    ⚠️ SIGNAL LOST! DATA SAVED LOCALLY. DO NOT REFRESH!
 </div>
 
     <div id="view-units" class="view-section active">  
-        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">  
-            <h2 style="margin:0">Timer Sinjai</h2>  
+        <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; border-bottom: 2px solid var(--primary); padding-bottom:10px;">  
+            <h2 style="margin:0; font-family:'Orbitron'; letter-spacing:2px;">RACE TRACK</h2>  
             <div style="text-align:right">  
-                <div id="live-clock" style="font-weight:bold; color:var(--accent)">00:00:00</div>  
-                <small id="current-user-display" style="color:#64748b"></small>  
+                <div id="live-clock" style="font-weight:bold; color:var(--success); font-family:'Orbitron'; font-size:1.2rem;">00:00:00</div>  
+                <small id="current-user-display" style="color:#888; text-transform:uppercase;"></small>  
             </div>  
         </div>  
         <div class="grid" id="unit-container"></div>  
-        <button class="btn-main" style="margin-top:25px; background:var(--primary)" onclick="addNewUnit()">+ Tambah Unit</button>  
+        <button class="btn-main" style="margin-top:25px; background:#333; box-shadow:0 4px 0 #111;" onclick="addNewUnit()">+ ADD NEW MACHINE</button>  
     </div>  
 
     <div id="view-queue" class="view-section">  
-        <h2 style="color:var(--accent)">📋 Antrian</h2>  
+        <h2 style="font-family:'Orbitron';">🏁 STARTING GRID / ANTRIAN</h2>  
         <div class="admin-card">  
-            <input type="text" id="q-name" placeholder="Nama Pelanggan" oninput="checkQueueReady()">  
+            <input type="text" id="q-name" placeholder="DRIVER NAME" oninput="checkQueueReady()">  
             <div style="display: flex; gap: 10px;">  
                 <select id="q-dur" onchange="checkQueueReady()">  
-                    <option value="" disabled selected>Durasi</option>  
-                    <option value="20">20 Mnt</option><option value="40">40 Mnt</option><option value="60">1 Jam</option>  
+                    <option value="" disabled selected> DURASI</option>  
+                    <option value="20">20 MIN</option><option value="40">40 MIN</option><option value="60">1 HOUR</option>  
                 </select>  
                 <select id="q-pay-init" onchange="checkQueueReady()">  
-                    <option value="" disabled selected>Bayar?</option>  
-                    <option value="false">Belum</option><option value="true">Sudah</option>  
+                    <option value="" disabled selected>BAYAR?</option>  
+                    <option value="false">NO</option><option value="true">YES</option>  
                 </select>  
             </div>  
-            <button id="btn-add-queue" onclick="addToQueue()" class="btn-main" style="margin-top:10px" disabled>TAMBAH ANTRIAN</button>  
+            <button id="btn-add-queue" onclick="addToQueue()" class="btn-main" style="margin-top:10px" disabled>CONFIRM GRID POSITION</button>  
         </div>  
         <div class="admin-card" style="padding:10px;"><table id="queue-table"></table></div>  
     </div>  
 
     <div id="view-qris" class="view-section">  
-        <div style="text-align: center; background: white; padding: 25px; border-radius: 30px; border: 3px solid var(--accent);">  
-            <img src="https://enggenk.github.io/Sinjai/qris (1).jpg" alt="QRIS" style="width:100%; max-width:280px; border-radius:15px;">  
-            <h3 style="margin:15px 0 5px;">ELICE STORE, TLN NS</h3>  
-            <code style="color:var(--accent)">NMID: ID1024336934079</code>  
+        <h2 style="font-family:'Orbitron'; text-align:center;">PIT PAYMENT</h2>
+        <div style="text-align: center; background: white; padding: 25px; border-radius: 10px; border-top: 5px solid var(--primary);">  
+            <img src="https://enggenk.github.io/Sinjai/qris (1).jpg" alt="QRIS" style="width:100%; max-width:280px; filter: contrast(1.1);">  
+            <h3 style="margin:15px 0 5px; color:#000;">ELICE STORE, TLN NS</h3>  
+            <code style="color:var(--primary); font-weight:bold;">NMID: ID1024336934079</code>  
         </div>  
     </div>  
 
     <div id="view-reports" class="view-section">  
-        <div class="admin-card" style="background: linear-gradient(45deg, var(--accent), #818cf8); color: white; text-align:center">  
-            <p style="margin:0; opacity:0.9" id="income-label">Total Pendapatan (Semua)</p>  
-            <h1 id="total-income" style="margin:10px 0; font-size:2.5rem">Rp 0</h1>  
-            <div style="background: rgba(255,255,255,0.2); border-radius: 10px; padding: 5px; margin-top: 5px;">  
-                <small>Jumlah Unit Terpakai: <b id="total-usage">0</b> Kali</small>  
+        <div class="admin-card" style="background: linear-gradient(135deg, var(--primary), #900); color: white; text-align:center; border:none;">  
+            <p style="margin:0; opacity:0.8; font-family:'Orbitron'; font-size:0.7rem;" id="income-label">TOTAL REVENUE (ALL SESSIONS)</p>  
+            <h1 id="total-income" style="margin:10px 0; font-size:2.2rem; font-family:'Orbitron';">Rp 0</h1>  
+            <div style="background: rgba(0,0,0,0.3); border-radius: 5px; padding: 8px; margin-top: 5px;">  
+                <small style="font-family:'Orbitron';">COMPLETED LAPS: <b id="total-usage" style="color:var(--success)">0</b></small>  
             </div>  
         </div>  
         <div class="filter-bar">  
-            <button class="filter-btn active" onclick="setReportFilter('all', this)">SEMUA</button>  
-            <button class="filter-btn" onclick="setReportFilter('daily', this)">HARI INI</button>  
-            <button class="filter-btn" onclick="setReportFilter('weekly', this)">MINGGU INI</button>  
-            <button class="filter-btn" onclick="setReportFilter('monthly', this)">BULAN INI</button>  
+            <button class="filter-btn active" onclick="setReportFilter('all', this)">ALL</button>  
+            <button class="filter-btn" onclick="setReportFilter('daily', this)">TODAY</button>  
+            <button class="filter-btn" onclick="setReportFilter('weekly', this)">WEEK</button>  
+            <button class="filter-btn" onclick="setReportFilter('monthly', this)">MONTH</button>  
         </div>  
         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">  
-            <h3 style="margin:0">Riwayat Sesi</h3>  
-            <button class="restrict-admin" onclick="clearAllLogs()" style="background:var(--danger); color:white; padding:5px 12px; border-radius:10px; font-size:0.7rem;">Hapus History</button>  
+            <h3 style="margin:0; font-family:'Orbitron'; font-size:0.9rem;">TELEMETRY HISTORY</h3>  
+            <button class="restrict-admin" onclick="clearAllLogs()" style="background:var(--danger); color:white; padding:5px 12px; border-radius:3px; font-size:0.6rem; font-family:'Orbitron';">WIPE DATA</button>  
         </div>  
-        <div class="admin-card" style="padding:10px; overflow-x:auto">  
+        <div class="admin-card" style="padding:0; overflow-x:auto; background:transparent; border:none;">  
             <table>  
-                <thead style="background:#f1f5f9">  
-                    <tr><th>Unit</th><th>Mulai</th><th>Selesai</th><th>Dur</th><th>Biaya</th><th>Staff</th><th>Aksi</th></tr>  
+                <thead style="background:#15151e">  
+                    <tr><th>CAR</th><th>OUT</th><th>IN</th><th>DUR</th><th>FEE</th><th>STAFF</th><th>DEL</th></tr>  
                 </thead>  
                 <tbody id="log-body"></tbody>  
             </table>  
@@ -173,58 +197,57 @@ order: 0 !important;
 
     <div id="view-admin" class="view-section">  
         <div class="admin-card restrict-admin">  
-            <h3>👥 Kelola Staff</h3>  
-            <input type="text" id="new-username" placeholder="Username">  
-            <input type="password" id="new-password" placeholder="Password">  
-            <select id="new-role"><option value="staff">Staff</option><option value="admin">Admin</option></select>  
-            <button onclick="registerUser()" class="btn-main" style="background:var(--success)">SIMPAN USER</button>  
+            <h3 style="font-family:'Orbitron'; color:var(--primary);">👥 TEAM PERSONNEL</h3>  
+            <input type="text" id="new-username" placeholder="NAME">  
+            <input type="password" id="new-password" placeholder="PASSWORD">  
+            <select id="new-role"><option value="staff">PIT CREW</option><option value="admin">TEAM PRINCIPAL</option></select>  
+            <button onclick="registerUser()" class="btn-main" style="background:var(--success); box-shadow:0 4px 0 #008a7d;">HIRE STAFF</button>  
             <table style="margin-top:15px"><tbody id="user-list-body"></tbody></table>  
         </div>  
         <div class="admin-card restrict-admin">  
-            <h3>💰 Atur Harga</h3>  
-            <label>20 Mnt:</label><input type="number" id="p-20">  
-            <label>40 Mnt:</label><input type="number" id="p-40">  
-            <label>1 Jam:</label><input type="number" id="p-60">  
-            <button onclick="savePrices()" class="btn-main" style="background:var(--success); margin-top:10px">UPDATE HARGA</button>  
+            <h3 style="font-family:'Orbitron'; color:var(--primary);">💰 TICKET PRICES</h3>  
+            <label style="font-size:0.8rem">20 MIN STINT:</label><input type="number" id="p-20">  
+            <label style="font-size:0.8rem">40 MIN STINT:</label><input type="number" id="p-40">  
+            <label style="font-size:0.8rem">1 HOUR STINT:</label><input type="number" id="p-60">  
+            <button onclick="savePrices()" class="btn-main" style="background:var(--success); margin-top:10px; box-shadow:0 4px 0 #008a7d;">SYNC PRICES</button>  
         </div>  
-        <div class="admin-card restrict-admin" style="border: 2px dashed var(--accent);">  
-            <h3>💾 Database</h3>  
-            <button onclick="exportData()" class="btn-main" style="background:var(--accent)">EXPORT DATA (JSON)</button>  
+        <div class="admin-card restrict-admin" style="border: 1px dashed var(--primary);">  
+            <h3 style="font-family:'Orbitron';">💾 PADDOCK DATA</h3>  
+            <button onclick="exportData()" class="btn-main" style="background:#444; box-shadow:0 4px 0 #222;">EXPORT TELEMETRY (JSON)</button>  
         </div>  
        <button onclick="logout()" class="btn-main"  
-    style="background:var(--primary); margin-top:20px;">  
-LOGOUT
-
+    style="background:transparent; border:2px solid var(--primary); margin-top:20px; box-shadow:none; color:var(--primary);">  
+EJECT SYSTEM (LOGOUT)
 </button>  
         </div>  <div class="taskbar">  
-        <button class="nav-item active" onclick="switchView('units', this)"><span>🏎️</span>Unit</button>  
-        <button class="nav-item" onclick="switchView('queue', this)"><span>⏳</span>Antrian</button>  
-        <button class="nav-item" onclick="switchView('qris', this)"><span>📸</span>QRIS</button>  
-        <button class="nav-item" onclick="switchView('reports', this)"><span>💵</span>Laporan</button>  
-        <button class="nav-item" onclick="switchView('admin', this)"><span>⚙️</span>Admin</button>  
+        <button class="nav-item active" onclick="switchView('units', this)"><span>🏎️</span>TRACK</button>  
+        <button class="nav-item" onclick="switchView('queue', this)"><span>🚦</span>GRID</button>  
+        <button class="nav-item" onclick="switchView('qris', this)"><span>💳</span>PIT</button>  
+        <button class="nav-item" onclick="switchView('reports', this)"><span>📊</span>LOGS</button>  
+        <button class="nav-item" onclick="switchView('admin', this)"><span>🛠️</span>HQ</button>  
     </div>  
 </div>  
 
 <div id="modal-start" class="modal-overlay" style="display:none;">  
     <div class="modal-box">  
-        <h2>Mulai Sesi</h2>  
+        <h2 style="font-family:'Orbitron'; color:var(--primary);">START SESSION</h2>  
         <div id="dur-options" style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;"></div>  
-        <p style="text-align:left; font-weight:bold; margin: 15px 0 5px;">Status Bayar:</p>  
+        <p style="text-align:left; font-family:'Orbitron'; font-size:0.7rem; margin: 15px 0 5px;">PAYMENT STATUS:</p>  
         <div style="display: flex; gap: 10px;">  
-            <button id="opt-unpaid" class="btn-main" style="background:#f1f5f9; color:#333;" onclick="setTempPay(false)">BELUM</button>  
-            <button id="opt-paid" class="btn-main" style="background:#f1f5f9; color:#333;" onclick="setTempPay(true)">SUDAH</button>  
+            <button id="opt-unpaid" class="btn-main" style="background:#333; box-shadow:none;" onclick="setTempPay(false)">BELUMPI BAYAR</button>  
+            <button id="opt-paid" class="btn-main" style="background:#333; box-shadow:none;" onclick="setTempPay(true)">SUDAHMI BAYAR</button>  
         </div>  
-        <button id="btn-confirm-start" class="btn-main" style="margin-top:25px;" onclick="confirmStart()" disabled>MULAI!</button>  
-        <button onclick="closeModal()" style="background:none; color:#94a3b8; margin-top:10px;">Batal</button>  
+        <button id="btn-confirm-start" class="btn-main" style="margin-top:25px;" onclick="confirmStart()" disabled>START!</button>  
+        <button onclick="closeModal()" style="background:none; color:#888; margin-top:10px; font-family:'Orbitron'; font-size:0.7rem;">ABORT</button>  
     </div>  
 </div>  
 
 <div id="modal-stop-confirm" class="modal-overlay" style="display:none;">  
     <div class="modal-box">  
-        <h2 id="stop-msg"></h2>  
+        <h2 id="stop-msg" style="font-family:'Orbitron';"></h2>  
         <div id="check-return-section">  
-            <button class="btn-main" style="background:var(--success)" onclick="showPaymentAction()">ADAMI !!!</button>  
-            <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>  
+            <button class="btn-main" style="background:var(--success); box-shadow:0 4px 0 #008a7d;" onclick="showPaymentAction()">ADAMI !!!</button>  
+            <button class="btn-main" style="background:#444; margin-top:10px; box-shadow:0 4px 0 #222;" onclick="closeStopModal()">BACK TO TRACK</button>  
         </div>  
         <div id="payment-action-section" style="display:none; margin-top: 15px;">  
             <div id="payment-status-display"></div>  
@@ -235,36 +258,34 @@ LOGOUT
 
 <div id="modal-swap-unit" class="modal-overlay" style="display:none;">  
     <div class="modal-box">  
-        <h3 id="swap-unit-title">Tukar Unit</h3>  
-        <p>Pilih unit tujuan (harus kosong):</p>  
+        <h3 id="swap-unit-title" style="font-family:'Orbitron';">SWITCH CAR</h3>  
+        <p style="font-size:0.8rem">Select target machine (must be empty):</p>  
         <div id="swap-unit-list" style="display:flex; flex-direction:column; gap:10px;"></div>  
-        <button onclick="closeSwapModal()" style="background:none; color:#94a3b8; margin-top:px; width:100%">Batal</button>  
+        <button onclick="closeSwapModal()" style="background:none; color:#888; margin-top:10px; width:100%; font-family:'Orbitron';">CANCEL</button>  
     </div>  
 </div>  
 
 <div id="modal-q-select" class="modal-overlay" style="display:none;">  
     <div class="modal-box">  
-        <h3>Pilih Unit Kosong</h3>  
+        <h3 style="font-family:'Orbitron';">ASSIGN MACHINE</h3>  
         <div id="unit-selection-list" style="display:flex; flex-direction:column; gap:10px;"></div>  
-        <button onclick="closeQModal()" style="background:var(--danger); margin-top:20px; width:100%">TUTUP</button>  
+        <button onclick="closeQModal()" style="background:var(--danger); margin-top:20px; width:100%; font-family:'Orbitron'; box-shadow:0 4px 0 #900;">CLOSE</button>  
     </div>  
 </div>
 
 <div id="modal-install-pwa" class="modal-overlay" style="display:none; z-index: 3000;">  
     <div class="modal-box">  
-        <span style="font-size:3rem">📲</span>  
-        <h3>Install Aplikasi</h3>  
-        <p>Pasang aplikasi <b>YSA021 Sinjai</b> ke layar utama agar lebih mudah diakses dan full screen tanpa address bar.</p>  
-        <button id="btn-install-pwa" class="btn-main" style="background:var(--accent); margin-top:15px">PASANG SEKARANG</button>  
-        <button onclick="closeInstallModal()" style="background:none; color:#94a3b8; margin-top:10px; width:100%">Nanti Saja</button>  
+        <span style="font-size:3rem">🏎️</span>  
+        <h3 style="font-family:'Orbitron';">INSTALL RACE CONTROL</h3>  
+        <p style="font-size:0.8rem">Add <b>F1 Sinjai</b> to home screen for full cockpit experience.</p>  
+        <button id="btn-install-pwa" class="btn-main" style="background:var(--primary); margin-top:15px">INSTALL NOW</button>  
+        <button onclick="closeInstallModal()" style="background:none; color:#888; margin-top:10px; width:100%; font-family:'Orbitron'; font-size:0.7rem;">NOT NOW</button>  
     </div>  
 </div>  
+
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-app-compat.js"></script>  
     <script src="https://www.gstatic.com/firebasejs/9.1.3/firebase-database-compat.js"></script>  <script>  
-    // For Firebase JS SDK v7.20.0 and later, measurementId is optional
-
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
-// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+    
 const firebaseConfig = {
   apiKey: "AIzaSyCINEztpEybnoiqaXzGnabilMUSGx5KiBU",
   authDomain: "nunukan1.firebaseapp.com",
@@ -286,7 +307,6 @@ let users = [], unitNames = [], prices = {}, logs = [], queue = [];
 if (offlineData) {
 console.log('📦 Data dimuat dari local backup (Early Load)');
 const data = JSON.parse(offlineData);
-
 users = data.users || users;  
 unitNames = data.unitNames || unitNames;  
 prices = data.prices || prices;  
@@ -300,17 +320,11 @@ activeUsers = data.activeUsers || {};
 activeDurations = data.activeDurations || {};  
 activeStaff = data.activeStaff || {};  
 activeTransferInfo = data.activeTransferInfo || {};  
-
 }
-
-console.log('📦 Data dimuat dari local backup');
-
-
 
 if (!navigator.onLine && offlineData) {  
 initOfflineApp();  
 bootstrapApp();
-
 }
 
 let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = 'all';  
@@ -318,58 +332,36 @@ let currentUser = null, timers = {}, warningPlayed = {}, currentReportFilter = '
     function bootstrapApp() {  
 const savedUser = localStorage.getItem('currentUser');  
 if (!savedUser) return;  
-
 currentUser = JSON.parse(savedUser);  
-
 document.getElementById('login-overlay').style.display = 'none';  
 document.getElementById('app').style.display = 'block';  
 document.getElementById('current-user-display').innerText =  
-    "Server: " + currentUser.user;  
-
+    "PIT STAFF: " + currentUser.user;  
 applyPermissions();  
 initDashboard();  
 renderQueue();  
 renderLogs();  
 renderUserList();
-
 }
 
 function initOfflineApp() {  
-console.log('⚡ OFFLINE MODE');  
-
-const savedUser = localStorage.getItem('currentUser');  
-
-// ❌ JANGAN tampilkan form login  
-
-
-// ✅ Jika ada session → langsung masuk  
-if (savedUser) {  
-    currentUser = JSON.parse(savedUser);  
-
-    document.getElementById('login-overlay').style.display = 'none';  
-    document.getElementById('app').style.display = 'block';  
-    document.getElementById('current-user-display').innerText =  
-        "Aktif (Offline): " + currentUser.user;  
-
-    applyPermissions();  
-    initDashboard();  
-    renderQueue();  
-    renderLogs();  
-    renderUserList();  
-} else {  
-    // ❗ Jika BELUM PERNAH LOGIN & offline → BLOCK  
-    document.getElementById('login-form').style.display = 'none';  
-    document.getElementById('loading-text').innerText =  
-        "Offline — login pertama wajib online";  
-}
-
+    const savedUser = localStorage.getItem('currentUser');  
+    if (savedUser) {  
+        currentUser = JSON.parse(savedUser);  
+        document.getElementById('login-overlay').style.display = 'none';  
+        document.getElementById('app').style.display = 'block';  
+        document.getElementById('current-user-display').innerText = "OFFLINE: " + currentUser.user;  
+        applyPermissions(); initDashboard(); renderQueue(); renderLogs(); renderUserList();  
+    } else {  
+        document.getElementById('login-form').style.display = 'none';  
+        document.getElementById('loading-text').innerText = "OFFLINE MODE - INITIAL LOGIN REQUIRED ONLINE";  
+    }
 }
 
 let activeUnitIdx = null, tempDur = null, tempPay = null, stopIdx = null, selectedQIdx = null, swapSourceIdx = null;  
-    let expiredUnits = new Set();     // unit yang sudah habis
+    let expiredUnits = new Set();     
+let voiceInterval = null;        
 
-let voiceInterval = null;        // interval voice global
-// --- 1. JALANKAN INI DULU (AGAR BISA OFFLINE) ---
 function loadFromLocalStorage() {
 const offlineData = localStorage.getItem('offline_backup');
 if (offlineData) {
@@ -387,22 +379,15 @@ activeUsers = data.activeUsers || {};
 activeDurations = data.activeDurations || {};
 activeStaff = data.activeStaff || {};
 activeTransferInfo = data.activeTransferInfo || {};
-
-console.log('✅ Offline Data Loaded');  
-    bootstrapApp(); // 
+bootstrapApp(); 
+}
 }
 
-}
-
-// Panggil fungsi muat lokal segera
 loadFromLocalStorage();
 
-// --- 2. LOGIKA FIREBASE (JALAN DI LATAR BELAKANG) ---
 db.ref('app_data').on('value', (snapshot) => {
 const data = snapshot.val();
 if (!data) return;
-
-console.log('📡 Syncing from Firebase...');  
 users = data.users || users;  
 unitNames = data.units || unitNames;  
 prices = data.prices || prices;  
@@ -417,7 +402,6 @@ activeDurations = data.activeDurations || {};
 activeStaff = data.activeStaff || {};  
 activeTransferInfo = data.activeTransferInfo || {};  
 
-// Sembunyikan loading jika data sudah sampai  
 document.getElementById('loading-text').style.display = 'none';  
 document.getElementById('login-form').style.display = 'block';  
 
@@ -425,22 +409,13 @@ if (currentUser) {
     initDashboard();  
     renderQueue();  
     renderLogs();  
-    // Update input harga di admin panel  
     if(document.getElementById('p-20')) {  
         document.getElementById('p-20').value = prices[20] || 0;  
         document.getElementById('p-40').value = prices[40] || 0;  
         document.getElementById('p-60').value = prices[60] || 0;  
     }  
 }  
-  
-// Simpan hasil download terbaru ke lokal untuk penggunaan offline nanti  
 saveLocalBackup();
-
-}, (error) => {
-// JIKA ERROR (OFFLINE): Paksa tampilkan form login
-console.warn("Firebase offline/error:", error);
-document.getElementById('loading-text').innerText = "Mode Offline Aktif";
-document.getElementById('login-form').style.display = 'block';
 });
 
 function saveAppState() {  
@@ -450,28 +425,13 @@ const data = {
     activeUsers, activeDurations, activeStaff, activeTransferInfo,  
     _updatedAt: Date.now()  
 };  
-
-
-// selalu simpan lokal dulu  
 localStorage.setItem('offline_backup', JSON.stringify(data));  
-
-// coba kirim ke server  
 db.ref('app_data').update(data)  
-    .then(() => {  
-        localStorage.removeItem('pending_sync');  
-    })  
-    .catch(() => {  
-       handleSyncFailure();
-        console.warn('Offline → data disimpan lokal');  
-        localStorage.setItem('pending_sync', 'true');  
-    });
+    .then(() => { localStorage.removeItem('pending_sync'); })  
+    .catch(() => { handleSyncFailure(); localStorage.setItem('pending_sync', 'true'); });
+}
 
-}
-function handleSyncFailure() {
-    console.log('Data disimpan secara lokal (Offline)');
-    localStorage.setItem('pending_sync', 'true');
-    // Menampilkan toast kecil atau pesan bahwa data belum sinkron
-}
+function handleSyncFailure() { localStorage.setItem('pending_sync', 'true'); }
 
 function saveLocalBackup() {
 const payload = {
@@ -483,35 +443,18 @@ _lastUpdate: Date.now()
 localStorage.setItem('offline_backup', JSON.stringify(payload));
 }
 
-
-
 function attemptLogin() {
-if (!navigator.onLine) {
-alert("Login pertama harus online");
-return;
-}
-
+if (!navigator.onLine) { alert("Login pertama harus online"); return; }
 const u = document.getElementById('user-input').value;  
 const p = document.getElementById('pass-input').value;  
-
 const userFound = users.find(x => x.user === u && x.pass === p);  
-
 if (userFound) {  
     currentUser = userFound;  
     localStorage.setItem('currentUser', JSON.stringify(userFound));  
-
     document.getElementById('login-overlay').style.display = 'none';  
     document.getElementById('app').style.display = 'block';  
-
-    applyPermissions();  
-    initDashboard();  
-    renderQueue();  
-    renderLogs();  
-    renderUserList();  
-} else {  
-    document.getElementById('login-err').style.display = 'block';  
-}
-
+    applyPermissions(); initDashboard(); renderQueue(); renderLogs(); renderUserList();  
+} else { document.getElementById('login-err').style.display = 'block'; }
 }
 
 function applyPermissions() {  
@@ -531,38 +474,30 @@ function applyPermissions() {
 function initDashboard() {
 const container = document.getElementById('unit-container');
 container.innerHTML = "";
-
-// UBAH DISINI: Kita anggap semua user yang login boleh edit unit (Staff & Admin)  
-// Sebelumnya: const isAdmin = currentUser && currentUser.role === 'admin';  
-const canEdit = true;   
-
 unitNames.forEach((name, i) => {  
     const isActive = !!endTimes[i];  
     container.innerHTML += `  
         <div class="card ${isActive ? 'active-run' : ''}" id="card-${i}">  
             <div style="display:flex; justify-content:space-between; align-items:center;">  
-                <div style="font-weight:800">${name}</div>  
+                <div style="font-weight:800; font-family:'Orbitron'; color:#eee; font-size:0.8rem">${name}</div>  
                 <div style="display:flex; gap:8px;">  
-                    ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--accent); font-size:1rem; padding:0;">🔄</button>` : ''}  
-                      
+                    ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--success); font-size:1rem; padding:0;">🔄</button>` : ''}  
                     <div style="display:flex; gap:5px;">  
-                        <button onclick="editUnitName(${i})" style="background:none; color:var(--accent); padding:0;">✏️</button>  
+                        <button onclick="editUnitName(${i})" style="background:none; color:#888; padding:0;">✏️</button>  
                         <button onclick="deleteUnit(${i})" style="background:none; color:var(--danger); padding:0;">🗑️</button>  
                     </div>  
-
                 </div>  
             </div>  
-            <div class="user-tag">${activeUsers[i] || ""}</div>  
-            <div class="transfer-tag">${activeTransferInfo[i] ? "Pindahan dari " + activeTransferInfo[i] : ""}</div>  
+            <div class="user-tag">${activeUsers[i] || "AVAILABLE"}</div>  
+            <div class="transfer-tag">${activeTransferInfo[i] ? "FROM " + activeTransferInfo[i] : ""}</div>  
             <div class="timer-display" id="timer-${i}">READY</div>  
             <div id="ctrl-${i}">  
-                ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">MULAI</button>`}  
+                ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">START RACE</button>`}  
             </div>  
-            <div class="staff-badge">${activeStaff[i] ? "Oleh: " + activeStaff[i] : ""}</div>  
+            <div class="staff-badge">${activeStaff[i] ? "CREW: " + activeStaff[i] : ""}</div>  
         </div>`;  
     if(isActive) resumeTimer(i);  
 });
-
 }
 
 function resumeTimer(i) {  
@@ -580,22 +515,16 @@ function resumeTimer(i) {
                     document.getElementById('alarm-warning').play();  
                     warningPlayed[i] = true;  
                 }
-
 } else {
 clearInterval(timers[i]);
-
 const el = document.getElementById(`timer-${i}`);  
 if (el) el.innerText = "00:00";  
-
 const card = document.getElementById(`card-${i}`);  
-card.className = 'card expired pin-top'; // 🔒 TETAP DI ATAS  
-
+card.className = 'card expired pin-top'; 
 document.getElementById('alarm-finished').play();  
 expiredUnits.add(unitNames[i]);  
-
 startVoiceLoop();  
 speakExpired(unitNames[i]);
-
 }
 }, 1000);
 }
@@ -605,17 +534,17 @@ function renderRunningCtrl(i) {
         if(!ctrl) return;  
         ctrl.innerHTML = `  
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:5px; margin-top:10px;">  
-                <button style="grid-column:span 2; font-size:0.7rem; background:${isPaid[i]?'var(--success)':'var(--danger)'}; color:white" onclick="confirmTogglePay(${i})">${isPaid[i]?'LUNAS':'BELUM BAYAR'}</button>  
-                <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, -60000)">-1</button>  
-                <button class="btn-main" style="background:#f1f5f9; color:var(--primary); font-size:0.7rem;" onclick="adjustTime(${i}, 60000)">+1</button>  
-                <button style="background:var(--warning); color:white" onclick="pause(${i})">${isPaused[i]?'LANJUT':'PAUSE'}</button>  
-                <button style="background:var(--danger); color:white" onclick="triggerStop(${i})">STOP</button>  
+                <button style="grid-column:span 2; font-size:0.6rem; background:${isPaid[i]?'var(--success)':'var(--danger)'}; color:white; border-radius:2px; padding:5px;" onclick="confirmTogglePay(${i})">${isPaid[i]?'SUDAHMI BAYAR':'BELUMPI BAYAR'}</button>  
+                <button class="btn-main" style="background:#333; box-shadow:none; font-size:0.7rem;" onclick="adjustTime(${i}, -60000)">-1m</button>  
+                <button class="btn-main" style="background:#333; box-shadow:none; font-size:0.7rem;" onclick="adjustTime(${i}, 60000)">+1m</button>  
+                <button style="background:var(--warning); color:white; font-size:0.7rem;" onclick="pause(${i})">${isPaused[i]?'LANJUT':'PAUSE'}</button>  
+                <button style="background:var(--danger); color:white; font-size:0.7rem;" onclick="triggerStop(${i})">FINISH</button>  
             </div>`;  
     }  
 
     function openSwapModal(i) {  
         swapSourceIdx = i;  
-        document.getElementById('swap-unit-title').innerText = "Tukar " + unitNames[i];  
+        document.getElementById('swap-unit-title').innerText = "SWITCH CAR " + unitNames[i];  
         const list = document.getElementById('swap-unit-list');  
         list.innerHTML = "";  
         let emptyUnitsFound = false;  
@@ -626,12 +555,12 @@ function renderRunningCtrl(i) {
                 const btn = document.createElement('button');  
                 btn.className = "btn-main";  
                 btn.style.background = "var(--success)";  
-                btn.innerText = "Pindah ke " + name;  
+                btn.innerText = "MOVE TO " + name;  
                 btn.onclick = () => executeSwap(idx);  
                 list.appendChild(btn);  
             }  
         });  
-        if(!emptyUnitsFound) list.innerHTML = "<p style='color:red'>Tidak ada unit kosong!</p>";  
+        if(!emptyUnitsFound) list.innerHTML = "<p style='color:red; font-size:0.7rem'>NO EMPTY CARS AVAILABLE!</p>";  
         document.getElementById('modal-swap-unit').style.display = 'flex';  
     }  
 
@@ -654,65 +583,42 @@ function renderRunningCtrl(i) {
 activeUnitIdx = i;   
 tempDur = null;   
 tempPay = null;   
-  
-// Reset warna dan teks tombol ke kondisi netral (#f1f5f9)  
 const btnPaid = document.getElementById('opt-paid');  
 const btnUnpaid = document.getElementById('opt-unpaid');  
-  
-btnPaid.style.background = "#f1f5f9";  
-btnPaid.style.color = "#333";  
-btnUnpaid.style.background = "#f1f5f9";  
-btnUnpaid.style.color = "#333";  
-  
+btnPaid.style.background = "#333";  
+btnPaid.style.color = "#888";  
+btnUnpaid.style.background = "#333";  
+btnUnpaid.style.color = "#888";  
 document.getElementById('btn-confirm-start').disabled = true;   
 document.getElementById('modal-start').style.display = 'flex';   
-  
 document.getElementById('dur-options').innerHTML = [20,40,60].map(d => {  
     const price = prices[d] || 0;  
     return `  
     <button class="btn-main dur-btn"  
-        style="background:white; color:var(--primary); border:1px solid #ddd; padding:12px 6px;"  
+        style="background:#222; color:#eee; border:1px solid #444; padding:12px 6px; box-shadow:none;"  
         onclick="setTempDur(${d}, this)">  
-        <div style="font-weight:800; font-size:0.9rem;">${d === 60 ? '1 Jam' : d + ' Mnt'}</div>  
-        <div style="font-size:0.7rem; color:var(--accent); margin-top:4px;">Rp ${price.toLocaleString()}</div>  
+        <div style="font-weight:800; font-size:0.8rem; font-family:'Orbitron';">${d === 60 ? '1 HOUR' : d + ' MIN'}</div>  
+        <div style="font-size:0.6rem; color:var(--success); margin-top:4px;">Rp ${price.toLocaleString()}</div>  
     </button>  
     `;  
 }).join("");
-
 }
 
-function setTempDur(d, btn) { tempDur = d; document.querySelectorAll('#dur-options button').forEach(b => b.style.borderColor = "#ddd"); btn.style.borderColor = "var(--accent)"; checkReady(); }  
+function setTempDur(d, btn) { tempDur = d; document.querySelectorAll('#dur-options button').forEach(b => { b.style.borderColor = "#444"; b.style.color = "#eee"; }); btn.style.borderColor = "var(--success)"; btn.style.color = "var(--success)"; checkReady(); }  
     function setTempPay(s) {  
 tempPay = s;  
 const btnPaid = document.getElementById('opt-paid');  
 const btnUnpaid = document.getElementById('opt-unpaid');  
-
-// Kembalikan keduanya ke netral dulu  
-btnPaid.style.background = "#f1f5f9";  
-btnPaid.style.color = "#333";  
-btnUnpaid.style.background = "#f1f5f9";  
-btnUnpaid.style.color = "#333";  
-
-// Beri warna hanya pada yang dipilih  
-if (s === true) {  
-    btnPaid.style.background = "var(--success)";  
-    btnPaid.style.color = "white";  
-} else if (s === false) {  
-    btnUnpaid.style.background = "var(--danger)";  
-    btnUnpaid.style.color = "white";  
-}  
+btnPaid.style.background = "#333"; btnPaid.style.color = "#888";  
+btnUnpaid.style.background = "#333"; btnUnpaid.style.color = "#888";  
+if (s === true) { btnPaid.style.background = "var(--success)"; btnPaid.style.color = "white"; } 
+else if (s === false) { btnUnpaid.style.background = "var(--danger)"; btnUnpaid.style.color = "white"; }  
 checkReady();
-
 }
 
 function checkReady() {   
-// PERBAIKAN: Cek kondisi dengan ketat. Jika belum lengkap, tombol MATI.  
-if(tempDur && tempPay !== null) {  
-    document.getElementById('btn-confirm-start').disabled = false;   
-} else {  
-    document.getElementById('btn-confirm-start').disabled = true;  
-}
-
+if(tempDur && tempPay !== null) { document.getElementById('btn-confirm-start').disabled = false; } 
+else { document.getElementById('btn-confirm-start').disabled = true; }
 }
 
 function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeModal(); }  
@@ -731,7 +637,7 @@ function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeM
     function triggerStop(i) {   
         stopIdx = i;   
         document.getElementById('modal-stop-confirm').style.display = 'flex';   
-        document.getElementById('stop-msg').innerText = "Mobil nomor " + unitNames[i] ;   
+        document.getElementById('stop-msg').innerText = "MOBIL NOMOR: " + unitNames[i] ;   
         document.getElementById('check-return-section').style.display = 'block';   
         document.getElementById('payment-action-section').style.display = 'none';   
     }  
@@ -741,26 +647,18 @@ function confirmStart() { startUnit(activeUnitIdx, tempDur, tempPay, ""); closeM
         document.getElementById('payment-action-section').style.display = 'block';   
         const cost = parseInt(prices[activeDurations[stopIdx]]) || 0;   
         document.getElementById('payment-status-display').innerHTML = isPaid[stopIdx] ?   
-            `<h2 style="color:var(--success)">LUNAS</h2>` : `<h2 style="color:var(--danger)">TAGIHAN: Rp ${cost.toLocaleString()}</h2>`;   
+            `<h2 style="color:var(--success); font-family:'Orbitron';">CLEAR KETUA !!!</h2>` : 
+`<h2 style="color:var(--danger); font-family:'Orbitron'; animation: blink-red 0.6s infinite;">TAGIH: Rp ${cost.toLocaleString()}</h2>`
+
         document.getElementById('stop-final-btn-group').innerHTML = `  
-            <button class="btn-main" style="background:var(--success)" onclick="finalStop(${stopIdx}, ${!isPaid[stopIdx]})">SUDAH BAYAR MI</button>   
-            <button class="btn-main" style="background:#94a3b8; margin-top:10px" onclick="closeStopModal()">BATAL</button>`;   
+            <button class="btn-main" style="background:var(--success); box-shadow:0 4px 0 #008a7d;" onclick="finalStop(${stopIdx}, ${!isPaid[stopIdx]})">KONFIRMASI</button>   
+            <button class="btn-main" style="background:#444; margin-top:10px; box-shadow:0 4px 0 #222;" onclick="closeStopModal()">CANCEL</button>`;   
     }
 
 function finalStop(i, markAsPaid) {
-
-// 🔇 HENTIKAN VOICE LANGSUNG  
-expiredUnits.delete(unitNames[i]);   // hapus unit ini  
-speechSynthesis.cancel();            // paksa hentikan suara yg sedang jalan  
-
-// 🔕 Jika sudah tidak ada unit expired → stop loop total  
-if (expiredUnits.size === 0) {  
-    stopVoiceLoop();  
-}  
-
-// ---- logika stop lama tetap ----  
+expiredUnits.delete(unitNames[i]); speechSynthesis.cancel();            
+if (expiredUnits.size === 0) { stopVoiceLoop(); }  
 if (markAsPaid) isPaid[i] = true;  
-
 logs.unshift({  
     unit: unitNames[i],  
     start: startTimes[i],  
@@ -770,25 +668,14 @@ logs.unshift({
     cost: prices[activeDurations[i]],  
     staff: activeStaff[i]  
 });  
-
 clearInterval(timers[i]);  
-delete endTimes[i];  
-delete startTimes[i];  
-delete activeUsers[i];  
-delete activeDurations[i];  
-delete activeStaff[i];  
-delete isPaused[i];  
-delete isPaid[i];  
-delete activeTransferInfo[i];  
-
-saveAppState();  
-closeStopModal();
-
+delete endTimes[i]; delete startTimes[i]; delete activeUsers[i];  
+delete activeDurations[i]; delete activeStaff[i]; delete isPaused[i];  
+delete isPaid[i]; delete activeTransferInfo[i];  
+saveAppState(); closeStopModal();
 }
 
-function closeStopModal() {
-document.getElementById('modal-stop-confirm').style.display = 'none';
-}
+function closeStopModal() { document.getElementById('modal-stop-confirm').style.display = 'none'; }
 
 function addToQueue() {   
         const name = document.getElementById('q-name').value;  
@@ -801,11 +688,11 @@ function addToQueue() {
     function renderQueue() {   
         document.getElementById('queue-table').innerHTML = queue.map((q, idx) => `  
             <tr>  
-                <td style="text-align:left"><b>${q.name}</b><br><small>${q.dur} Mnt</small></td>  
-                <td><span class="q-badge ${q.paid ? 'q-paid' : 'q-unpaid'}" onclick="toggleQueuePaid(${idx})">${q.paid ? 'LUNAS' : 'BELUM'}</span></td>  
+                <td style="text-align:left; color:#eee;"><b>${q.name}</b><br><small style="color:var(--success)">${q.dur} MIN STINT</small></td>  
+                <td><span class="q-badge ${q.paid ? 'q-paid' : 'q-unpaid'}" style="padding:4px 8px; border-radius:3px; font-size:0.6rem; font-weight:bold; background:${q.paid?'var(--success)':'var(--danger)'}; color:white;" onclick="toggleQueuePaid(${idx})">${q.paid ? 'PAID' : 'DUE'}</span></td>  
                 <td style="text-align:right">  
                     <button onclick="openQSelectModal(${idx})" style="background:var(--success); color:white; padding:5px 10px;">▶</button>   
-                    <button onclick="queue.splice(${idx},1);saveAppState()" style="color:var(--danger); background:none">✖</button>  
+                    <button onclick="queue.splice(${idx},1);saveAppState()" style="color:var(--danger); background:none; font-size:1.2rem;">✖</button>  
                 </td>  
             </tr>`).join("");   
     }  
@@ -816,26 +703,18 @@ function addToQueue() {
         list.innerHTML = "";   
         unitNames.forEach((name, i) => {   
             const busy = endTimes[i] && (endTimes[i] > Date.now() || isPaused[i]);  
-            list.innerHTML += `<button class="btn-main" style="background:${busy ? '#ccc' : 'var(--success)'}" ${busy ? 'disabled' : ''} onclick="confirmQueueStart(${i})">${name}</button>`;   
+            list.innerHTML += `<button class="btn-main" style="background:${busy ? '#333' : 'var(--success)'}; box-shadow:none;" ${busy ? 'disabled' : ''} onclick="confirmQueueStart(${i})">${name}</button>`;   
         });   
         document.getElementById('modal-q-select').style.display = 'flex';   
     }  
 
     function confirmQueueStart(unitIdx) {   
 const q = queue[selectedQIdx];   
-  
-// 1. Mulai Unit (Ini akan menyimpan status timer ke DB)  
 startUnit(unitIdx, parseInt(q.dur), q.paid, q.name);   
-  
-// 2. Hapus dari antrian lokal  
 queue.splice(selectedQIdx, 1);   
-  
-// 3. TAMBAHAN PENTING: Simpan perubahan antrian ke DB  
 saveAppState();   
-  
 closeQModal();   
 switchView('units', document.querySelectorAll('.nav-item')[0]);
-
 }
 
 function renderLogs() {  
@@ -852,7 +731,7 @@ function renderLogs() {
             return true;  
         });  
 
-        document.getElementById('income-label').innerText = `Total Pendapatan (${currentReportFilter.toUpperCase()})`;  
+        document.getElementById('income-label').innerText = `TOTAL TELEMETRY (${currentReportFilter.toUpperCase()})`;  
         const total = filtered.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);  
         document.getElementById('total-income').innerText = "Rp " + total.toLocaleString();  
         document.getElementById('total-usage').innerText = filtered.length;  
@@ -862,7 +741,7 @@ function renderLogs() {
                 <td>${new Date(l.start).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
                 <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
                 <td>${l.dur}m</td>  
-                <td>${parseInt(l.cost || 0).toLocaleString()}</td>  
+                <td style="color:var(--success)">${parseInt(l.cost || 0).toLocaleString()}</td>  
                 <td><small>${l.staff}</small></td>  
                 <td>${isAdmin ? `<button onclick="deleteLog(${i})" style="background:none; color:var(--danger)">🗑️</button>` : '✔'}</td>  
             </tr>`).join("");  
@@ -886,120 +765,59 @@ function renderLogs() {
         const p40 = parseInt(document.getElementById('p-40').value);  
         const p60 = parseInt(document.getElementById('p-60').value);  
         prices = { 20: p20, 40: p40, 60: p60 };  
-        saveAppState(); alert("Harga Diperbarui!");  
+        saveAppState(); alert("TELEMETRY: PRICES UPDATED!");  
     }  
 
     function closeModal() {   
 document.getElementById('modal-start').style.display = 'none';   
-// Reset warna dan teks saat ditutup  
-document.getElementById('opt-paid').style.background = "#f1f5f9";  
-document.getElementById('opt-paid').style.color = "#333";  
-document.getElementById('opt-unpaid').style.background = "#f1f5f9";  
-document.getElementById('opt-unpaid').style.color = "#333";
-
+document.getElementById('opt-paid').style.background = "#333";  
+document.getElementById('opt-unpaid').style.background = "#333";
 }
 
 function closeQModal() { document.getElementById('modal-q-select').style.display = 'none'; }  
     function checkQueueReady() { const n = document.getElementById('q-name').value, d = document.getElementById('q-dur').value, p = document.getElementById('q-pay-init').value; document.getElementById('btn-add-queue').disabled = !(n && d && p); }  
     function adjustTime(i, ms) { endTimes[i] += ms; saveAppState(); }  
     function pause(i) { isPaused[i] = !isPaused[i]; saveAppState(); }  
-    function editUnitName(i) { const n = prompt("Nama baru:", unitNames[i]); if(n) { unitNames[i] = n; saveAppState(); } }  
-    function addNewUnit() { const n = prompt("Nama Unit:"); if(n){ unitNames.push(n); saveAppState(); }}  
-    function deleteUnit(i) { if(confirm("Hapus unit?")){ unitNames.splice(i, 1); saveAppState(); }}  
-    function clearAllLogs() { if(confirm("Hapus semua history?")) { logs = []; saveAppState(); }}  
+    function editUnitName(i) { const n = prompt("NEW CAR NAME:", unitNames[i]); if(n) { unitNames[i] = n; saveAppState(); } }  
+    function addNewUnit() { const n = prompt("ENTER MACHINE NAME:"); if(n){ unitNames.push(n); saveAppState(); }}  
+    function deleteUnit(i) { if(confirm("DELETE THIS MACHINE?")){ unitNames.splice(i, 1); saveAppState(); }}  
+    function clearAllLogs() { if(confirm("WIPE ALL TELEMETRY HISTORY?")) { logs = []; saveAppState(); }}  
     function deleteLog(i) { logs.splice(i, 1); saveAppState(); }  
     function setReportFilter(t, b) { currentReportFilter = t; document.querySelectorAll('.filter-btn').forEach(x => x.classList.remove('active')); b.classList.add('active'); renderLogs(); }  
-    function toggleQueuePaid(idx) { if(confirm("Ubah status bayar?")) { queue[idx].paid = !queue[idx].paid; saveAppState(); } }  
-    function confirmTogglePay(i) { if(confirm("Ubah status pembayaran unit ini?")) { isPaid[i] = !isPaid[i]; saveAppState(); } }  
-    function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({logs, prices, unitNames, users})); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "backup.json"); dl.click(); }  
+    function toggleQueuePaid(idx) { if(confirm("CHANGE PAYMENT STATUS?")) { queue[idx].paid = !queue[idx].paid; saveAppState(); } }  
+    function confirmTogglePay(i) { if(confirm("TOGGLE PAYMENT FOR THIS MACHINE?")) { isPaid[i] = !isPaid[i]; saveAppState(); } }  
+    function exportData() { const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({logs, prices, unitNames, users})); const dl = document.createElement('a'); dl.setAttribute("href", dataStr); dl.setAttribute("download", "f1_backup.json"); dl.click(); }  
 
     setInterval(() => {   
         const el = document.getElementById('live-clock');  
         if(el) el.innerText = new Date().toLocaleTimeString('id-ID');   
     }, 1000);
 
-// 🌐 DETEKSI ONLINE → SYNC DATA LOKAL KE SERVER
 window.addEventListener('online', () => {
-if (localStorage.getItem('pending_sync')) {
-console.log('🔄 Online kembali → sinkronisasi');
-saveAppState();
-localStorage.removeItem('pending_sync');
-}
+if (localStorage.getItem('pending_sync')) { saveAppState(); localStorage.removeItem('pending_sync'); }
 });
 
-</script>
-
-<script>  
-  function logout() {  
-    localStorage.removeItem('currentUser');  
-    location.reload();  
-}  
-    // --- LOGIKA INSTALL PWA ---  
-      
-    // 1. Register Service Worker (Wajib untuk PWA)  
+function logout() { localStorage.removeItem('currentUser'); location.reload(); }  
+    
     if ('serviceWorker' in navigator) {  
     window.addEventListener('load', () => {  
-        // Memastikan file sw.js berada di folder yang sama dengan index.html
-        navigator.serviceWorker.register('./sw.js')  
-            .then((reg) => console.log('Service Worker Berhasil: ', reg.scope))
-            .catch((err) => console.log('Service Worker Gagal: ', err));  
-    });  
-}
+        navigator.serviceWorker.register('./sw.js').catch((err) => console.log('SW Gagal: ', err));  
+    }); }
 
-  
     let deferredPrompt;  
     const installModal = document.getElementById('modal-install-pwa');  
     const installBtn = document.getElementById('btn-install-pwa');  
-  
-    // 2. Tangkap event 'beforeinstallprompt'  
     window.addEventListener('beforeinstallprompt', (e) => {  
-        // Cegah Chrome menampilkan bar kecil di bawah secara otomatis  
-        e.preventDefault();  
-        // Simpan event untuk dipanggil nanti  
-        deferredPrompt = e;  
-          
-        // Cek apakah user sudah pernah menolak/menutup modal (opsional, pakai localStorage)  
+        e.preventDefault(); deferredPrompt = e;  
         const hasRefused = localStorage.getItem('pwa_refused');  
-          
-        // Tampilkan Modal Custom kita secara otomatis!  
-        if (!hasRefused) {  
-            installModal.style.display = 'flex';  
-        }  
+        if (!hasRefused) { installModal.style.display = 'flex'; }  
     });  
-  
-    // 3. Aksi saat tombol Install diklik  
     installBtn.addEventListener('click', async () => {  
-        if (deferredPrompt) {  
-            // Tampilkan prompt asli bawaan browser  
-            deferredPrompt.prompt();  
-              
-            // Tunggu respon user (Install / Cancel)  
-            const { outcome } = await deferredPrompt.userChoice;  
-            console.log(`User response: ${outcome}`);  
-              
-            // Reset variabel  
-            deferredPrompt = null;  
-        }  
-        // Tutup modal custom  
+        if (deferredPrompt) { deferredPrompt.prompt(); const { outcome } = await deferredPrompt.userChoice; deferredPrompt = null; }  
         closeInstallModal();  
     });  
-  
-    // 4. Fungsi menutup modal  
-    function closeInstallModal() {  
-        installModal.style.display = 'none';  
-        // Opsional: Simpan status agar tidak muncul terus menerus jika user menolak  
-        // localStorage.setItem('pwa_refused', 'true');   
-    }  
-  
-    // 5. Sembunyikan modal jika aplikasi sudah terinstall  
-    window.addEventListener('appinstalled', () => {  
-        installModal.style.display = 'none';  
-        deferredPrompt = null;  
-        console.log('PWA was installed');  
-    });  
-      
-      
-    // 1. Fungsi untuk mengubah "Unit 1" menjadi "Unit Satu" agar natural  
+    function closeInstallModal() { installModal.style.display = 'none'; }  
+    
 function readUnitName(unitName) {  
     const num = unitName.replace(/\D/g, '');  
     if (!num) return unitName;  
@@ -1008,137 +826,36 @@ function readUnitName(unitName) {
     return `unit ${spoken}`;  
 }  
   
-  
-function startVoiceLoop() {  
-    if (voiceInterval) return;  
-  
-    speakExpiredUnits(); // langsung bicara pertama kali  
-  
-    voiceInterval = setInterval(() => {  
-        speakExpiredUnits();  
-    }, 20000);  
-}  
-function stopVoiceLoop() {  
-    if (voiceInterval) {  
-        clearInterval(voiceInterval);  
-        voiceInterval = null;  
-    }  
-  
-    expiredUnits.clear();  
-    speechSynthesis.cancel(); // 🔇 pastikan benar-benar senyap  
-}  
+function startVoiceLoop() { if (voiceInterval) return; speakExpiredUnits(); voiceInterval = setInterval(() => { speakExpiredUnits(); }, 20000); }  
+function stopVoiceLoop() { if (voiceInterval) { clearInterval(voiceInterval); voiceInterval = null; } expiredUnits.clear(); speechSynthesis.cancel(); }  
   
 function speakExpiredUnits() {  
     if (!('speechSynthesis' in window)) return;  
     if (expiredUnits.size === 0) return;  
-  
-    // 🔹 Unit expired (dibaca per digit)  
     const units = Array.from(expiredUnits).map(u => readUnitName(u));  
-    const unitText =  
-        units.length === 1  
-            ? units[0]  
-            : units.slice(0, -1).join(', ') + ' dan ' + units.slice(-1);  
-    // 🔹 Unit yang BELUM BAYAR  
-    const unpaidUnits = Array.from(expiredUnits)  
-        .map(u => ({ raw: u, spoken: readUnitName(u) }))  
-        .filter(o => {  
-            const idx = unitNames.indexOf(o.raw);  
-            return idx !== -1 && !isPaid[idx];  
-        })  
-        .map(o => o.spoken);  
-  
+    const unitText = units.length === 1 ? units[0] : units.slice(0, -1).join(', ') + ' dan ' + units.slice(-1);  
+    const unpaidUnits = Array.from(expiredUnits).map(u => ({ raw: u, spoken: readUnitName(u) }))
+        .filter(o => { const idx = unitNames.indexOf(o.raw); return idx !== -1 && !isPaid[idx]; }).map(o => o.spoken);  
     speechSynthesis.cancel();  
-  
-    // 🔈 1️⃣ VOICE NORMAL – unit habis  
-    const normalMsg = new SpeechSynthesisUtterance(  
-        `tor monitor ketua, ${unitText} sudah habis mi.`  
-    );  
-    normalMsg.lang = 'id-ID';  
-    normalMsg.rate = 0.95;  
-    normalMsg.pitch = 0.9;  
-    normalMsg.volume = 1;  
-  
+    const normalMsg = new SpeechSynthesisUtterance(`tor monitor ketua, ${unitText} sudah habis mi.`);  
+    normalMsg.lang = 'id-ID'; normalMsg.rate = 0.95; normalMsg.pitch = 0.9; normalMsg.volume = 1;  
     speechSynthesis.speak(normalMsg);  
-  
-    // 🔊 2️⃣ VOICE TEGAS – khusus BELUM BAYAR  
     if (unpaidUnits.length > 0) {  
-        const unpaidText =  
-            unpaidUnits.length === 1  
-                ? unpaidUnits[0]  
-                : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);  
-  
-        const alertMsg = new SpeechSynthesisUtterance(  
-            `${unpaidText} belumpi dibayar, ketua.`  
-        );  
-        alertMsg.lang = 'id-ID';  
-        alertMsg.rate = 1.5;   // lebih cepat  
-        alertMsg.pitch = 1.5;   // lebih berat  
-        alertMsg.volume = 2;  // 🔥 LEBIH KERAS  
-  
-        // kasih jeda dikit setelah voice pertama  
-        setTimeout(() => {  
-            speechSynthesis.speak(alertMsg);  
-        }, 600);  
+        const unpaidText = unpaidUnits.length === 1 ? unpaidUnits[0] : unpaidUnits.slice(0, -1).join(', ') + ' dan ' + unpaidUnits.slice(-1);  
+        const alertMsg = new SpeechSynthesisUtterance(`${unpaidText} belumpi dibayar, ketua.`);  
+        alertMsg.lang = 'id-ID'; alertMsg.rate = 1.3; alertMsg.pitch = 1.2; alertMsg.volume = 2;  
+        setTimeout(() => { speechSynthesis.speak(alertMsg); }, 800);  
     }  
 }  
 
 function handleConnectionChange() {
     const banner = document.getElementById('offline-banner');
-    const userDisplay = document.getElementById('current-user-display');
-    
-    if (navigator.onLine) {
-        banner.style.display = 'none';
-        if (userDisplay) userDisplay.style.color = '#64748b';
-        // Opsional: Langsung sinkronkan data saat sinyal kembali
-        if (localStorage.getItem('pending_sync')) {
-            saveAppState();
-        }
-    } else {
-        banner.style.display = 'block';
-        if (userDisplay) {
-            userDisplay.innerText = "localStorage:" + currentUser.user;  
-            userDisplay.style.color = '#ef4444';
-        }
-    }
+    if (navigator.onLine) { banner.style.display = 'none'; if (localStorage.getItem('pending_sync')) { saveAppState(); } } 
+    else { banner.style.display = 'block'; }
 }
-
-// Pasang pendengar event
 window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
-
-// Jalankan sekali saat startup
 handleConnectionChange();
 
-// Fungsi untuk mengatur tampilan peringatan offline
-function updateOnlineStatus() {
-    const offlineAlert = document.getElementById('offline-alert');
-    const userDisplay = document.getElementById('current-user-display');
-
-    if (navigator.onLine) {
-        // Saat Online
-        offlineAlert.style.display = 'none';
-        if (userDisplay) userDisplay.style.color = '#64748b'; // Warna normal
-    } else {
-        // Saat Offline
-        offlineAlert.style.display = 'block';
-        if (userDisplay) {
-            userDisplay.innerText = "Mode Offline Aktif (Data disimpan lokal)";
-            userDisplay.style.color = 'var(--danger)';
-        }
-        
-        // Opsional: Berikan feedback suara atau getaran
-        if ('vibrate' in navigator) navigator.vibrate(200);
-        console.warn("Aplikasi beralih ke mode offline.");
-    }
-}
-
-// Pasang Event Listener
-window.addEventListener('online', updateOnlineStatus);
-window.addEventListener('offline', updateOnlineStatus);
-
-// Jalankan pengecekan saat aplikasi pertama kali dimuat
-updateOnlineStatus();
-
-  
 </script>  </body>  
-</html>  
+</html>
