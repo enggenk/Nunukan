@@ -185,14 +185,12 @@
             <h3 style="margin:0; font-family:'Orbitron'; font-size:0.9rem;">TELEMETRY HISTORY</h3>  
             <button class="restrict-admin" onclick="clearAllLogs()" style="background:var(--danger); color:white; padding:5px 12px; border-radius:3px; font-size:0.6rem; font-family:'Orbitron';">WIPE DATA</button>  
         </div>  
-        <div class="admin-card" style="padding:0; overflow-x:auto; background:transparent; border:none;">  
-            <table>  
-                <thead style="background:#15151e">  
-                    <tr><th>CAR</th><th>OUT</th><th>IN</th><th>DUR</th><th>FEE</th><th>STAFF</th><th>DEL</th></tr>  
-                </thead>  
-                <tbody id="log-body"></tbody>  
-            </table>  
-        </div>  
+<div class="admin-card" style="padding:0; overflow-x:auto; background:transparent; border:none;">  
+    <table style="width: 100%; border-collapse: separate; border-spacing: 0 5px;">  
+        <tbody id="log-body">
+            </tbody>  
+    </table>  
+</div>
     </div>  
 
     <div id="view-admin" class="view-section">  
@@ -718,35 +716,83 @@ switchView('units', document.querySelectorAll('.nav-item')[0]);
 }
 
 function renderLogs() {  
-        const now = new Date();  
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();  
-        const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);  
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();  
-        const isAdmin = currentUser && currentUser.role === 'admin';  
-          
-        let filtered = logs.filter(l => {  
-            if (currentReportFilter === 'daily') return l.end >= startOfDay;  
-            if (currentReportFilter === 'weekly') return l.end >= startOfWeek;  
-            if (currentReportFilter === 'monthly') return l.end >= startOfMonth;  
-            return true;  
-        });  
+    const now = new Date();  
+    const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();  
+    const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);  
+    const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();  
+    const isAdmin = currentUser && currentUser.role === 'admin';  
+      
+    let filtered = logs.filter(l => {  
+        if (currentReportFilter === 'daily') return l.end >= startOfDay;  
+        if (currentReportFilter === 'weekly') return l.end >= startOfWeek;  
+        if (currentReportFilter === 'monthly') return l.end >= startOfMonth;  
+        return true;  
+    });  
 
-        document.getElementById('income-label').innerText = `TOTAL TELEMETRY (${currentReportFilter.toUpperCase()})`;  
-        const total = filtered.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);  
-        document.getElementById('total-income').innerText = "Rp " + total.toLocaleString();  
-        document.getElementById('total-usage').innerText = filtered.length;  
-        document.getElementById('log-body').innerHTML = filtered.map((l, i) => `  
-            <tr>  
-                <td><b>${l.unit}</b></td>  
-                <td>${new Date(l.start).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
-                <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>  
-                <td>${l.dur}m</td>  
-                <td style="color:var(--success)">${parseInt(l.cost || 0).toLocaleString()}</td>  
-                <td><small>${l.staff}</small></td>  
-                <td>${isAdmin ? `<button onclick="deleteLog(${i})" style="background:none; color:var(--danger)">🗑️</button>` : '✔'}</td>  
-            </tr>`).join("");  
-    }  
+    // Update Header Revenue
+    const total = filtered.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);  
+    document.getElementById('total-income').innerText = "Rp " + total.toLocaleString();  
+    document.getElementById('total-usage').innerText = filtered.length;  
 
+    // Pengelompokan Data Berdasarkan Tanggal
+    const groups = filtered.reduce((acc, log) => {
+        const dateKey = new Date(log.end).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+        if (!acc[dateKey]) acc[dateKey] = { logs: [], dailyTotal: 0 };
+        acc[dateKey].logs.push(log);
+        if (log.paid) acc[dateKey].dailyTotal += parseInt(log.cost || 0);
+        return acc;
+    }, {});
+
+    let html = "";
+    Object.keys(groups).forEach((date, index) => {
+        const group = groups[date];
+        // Baris Header Tanggal (Klik untuk buka detail)
+        html += `
+            <tr onclick="toggleGroup(${index})" style="background: #2c2c35; cursor: pointer; border-left: 4px solid var(--primary);">
+                <td colspan="4" style="text-align: left; padding: 12px; font-weight: bold; font-family: 'Orbitron'; font-size: 0.8rem;">
+                    📅 ${date} <span style="color: var(--success); margin-left:10px;">(Rp ${group.dailyTotal.toLocaleString()})</span>
+                </td>
+                <td colspan="3" style="text-align: right; padding-right: 15px; color: #888;">${group.logs.length} Laps ▾</td>
+            </tr>
+            <tr id="group-${index}" style="display: none; background: #15151e;">
+                <td colspan="7" style="padding: 0;">
+                    <table style="width: 100%; font-size: 0.7rem; border-top: 1px solid #333;">
+                        <tr style="color: var(--primary); font-weight: bold; background: #1a1a24;">
+                            <td style="padding: 8px;">UNIT</td><td>JAM</td><td>DUR</td><td>BIAYA</td><td>CREW</td><td>OPS</td>
+                        </tr>
+                        ${group.logs.map((l, logIdx) => `
+                            <tr style="border-bottom: 1px solid #222;">
+                                <td style="padding: 8px;"><b>${l.unit}</b></td>
+                                <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
+                                <td>${l.dur}m</td>
+                                <td style="color:var(--success)">${parseInt(l.cost || 0).toLocaleString()}</td>
+                                <td>${l.staff}</td>
+                                <td>${isAdmin ? `<button onclick="deleteLogWithConfirm(${logs.indexOf(l)})" style="background:none; color:var(--danger); border:none; padding:0;">🗑️</button>` : '✔'}</td>
+                            </tr>
+                        `).join('')}
+                    </table>
+                </td>
+            </tr>
+        `;
+    });
+
+    document.getElementById('log-body').innerHTML = html || "<tr><td colspan='7' style='padding:20px; color:#888;'>TIDAK ADA DATA TELEMETRY</td></tr>";  
+}
+
+// Fungsi Helper untuk Toggle Detail
+function toggleGroup(id) {
+    const el = document.getElementById(`group-${id}`);
+    el.style.display = el.style.display === 'none' ? 'table-row' : 'none';
+}
+
+// Fungsi Delete dengan Re-render
+function deleteLogWithConfirm(index) {
+    if(confirm("Hapus data ini?")) {
+        logs.splice(index, 1);
+        saveAppState();
+        renderLogs();
+    }
+}
     function registerUser() {  
         const u = document.getElementById('new-username').value;  
         const p = document.getElementById('new-password').value;  
