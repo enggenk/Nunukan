@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinjai-timer-v2.8.1';
+const CACHE_NAME = 'sinjai-timer-v2.9.3';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
