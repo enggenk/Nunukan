@@ -5,7 +5,7 @@
     <title>SINJAI Race Control</title>  <meta name="mobile-web-app-capable" content="yes">  
 <meta name="apple-mobile-web-app-capable" content="yes">  
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">  
-<meta name="apple-mobile-web-app-title" content="Sinjai Timer">
+<meta name="apple-mobile-web-app-title" content="Sinjai">
 
 <link rel="icon" type="image/png" sizes="192x192" href="https://enggenk.github.io/Nunukan/1770574638579.png">  
 <link rel="apple-touch-icon" href="https://enggenk.github.io/Nunukan/1770574638579.png">  <link rel="manifest" href="manifest.json">  <meta name="theme-color" content="#e10600">  
@@ -150,9 +150,12 @@
 
     <div id="view-units" class="view-section active">  
         <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; border-bottom: 2px solid var(--primary); padding-bottom:10px;">  
-            <h2 style="margin:0; font-family:'Orbitron'; letter-spacing:2px;">RACE TRACK SINJAI</h2>  
+        
+<h2 style="margin:0; font-family:'Orbitron'; letter-spacing:1.5px;">RACE TRACK SINJAI</h2>
+<div id="cache-version" style="font-size:0.3rem; color:#555; font-family:'Orbitron'; margin-top:1px;">Ver: Checking System...</div>  
+
             <div style="text-align:right">  
-                <div id="live-clock" style="font-weight:bold; color:var(--success); font-family:'Orbitron'; font-size:1.2rem;">00:00:00</div>  
+                <div id="live-clock" style="font-weight:bold; color:var(--success); font-family:'Orbitron'; font-size:0.7rem;">00:00:00</div>  
                 <small id="current-user-display" style="color:#888; text-transform:uppercase;"></small>  
             </div>  
         </div>  
@@ -1092,5 +1095,25 @@ window.addEventListener('online', handleConnectionChange);
 window.addEventListener('offline', handleConnectionChange);
 handleConnectionChange();
 
+
+// --- SCRIPT PENGAMBIL VERSI CACHE ---
+// Fungsi ini akan mengecek nama cache yang dibuat oleh sw.js
+function displayCacheVersion() {
+    if ('caches' in window) {
+        caches.keys().then(function(keyList) {
+            const versionEl = document.getElementById('cache-version');
+            if (keyList.length > 0) {
+                // Mengambil nama cache terakhir (biasanya berisi versi)
+                // Contoh output: "sinjai-race-v1"
+                versionEl.innerText = "VER: " + keyList[0].toUpperCase(); 
+            } else {
+                versionEl.innerText = "VER: ONLINE / NO CACHE";
+            }
+        });
+    }
+}
+
+// Panggil fungsi setelah halaman dimuat
+window.addEventListener('load', displayCacheVersion);
 </script>  </body>  
 </html>
