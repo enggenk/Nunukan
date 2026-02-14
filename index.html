@@ -840,11 +840,25 @@ closeQModal();
 switchView('units', document.querySelectorAll('.nav-item')[0]);
 }
 
-function renderLogs() {  
-        const now = new Date();  
-        const startOfDay = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();  
-        const startOfWeek = startOfDay - (now.getDay() * 24 * 60 * 60 * 1000);  
-        const startOfMonth = new Date(now.getFullYear(), now.getMonth(), 1).getTime();  
+    function renderLogs() {  
+        const now = new Date();
+        const cutoffHour = 3; // GANTI JAM PERGANTIAN HARI DI SINI (03:00 AM)
+
+        // --- LOGIKA WAKTU BARU (START JAM 3 PAGI) ---
+        // Kita tentukan "Tanggal Bisnis" hari ini.
+        // Jika sekarang jam 02:00 pagi tanggal 15, maka secara bisnis masih tanggal 14.
+        let businessDate = new Date(now);
+        if (now.getHours() < cutoffHour) {
+            businessDate.setDate(businessDate.getDate() - 1);
+        }
+
+        // Set startOfDay ke jam 03:00:00 pada tanggal bisnis tersebut
+        const startOfDay = new Date(businessDate.getFullYear(), businessDate.getMonth(), businessDate.getDate(), cutoffHour, 0, 0).getTime();
+        
+        // Untuk Mingguan & Bulanan juga menyesuaikan jam 3 pagi
+        const startOfWeek = startOfDay - (businessDate.getDay() * 24 * 60 * 60 * 1000);  
+        const startOfMonth = new Date(businessDate.getFullYear(), businessDate.getMonth(), 1, cutoffHour, 0, 0).getTime();  
+        
         const isAdmin = currentUser && currentUser.role === 'admin';  
           
         // Filter Logs (Pemasukan)
@@ -855,7 +869,7 @@ function renderLogs() {
             return true;  
         });  
 
-        // Filter Expenses (Pengeluaran) - Mengikuti filter waktu yang sama
+        // Filter Expenses (Pengeluaran) 
         let filteredExpenses = expenses.filter(e => {
             if (currentReportFilter === 'daily') return e.date >= startOfDay;
             if (currentReportFilter === 'weekly') return e.date >= startOfWeek;
@@ -863,40 +877,71 @@ function renderLogs() {
             return true;
         });
 
-        // 1. Hitung Total Pemasukan (Gross)
+        // --- PERHITUNGAN TOTAL GLOBAL (KOTAK MERAH ATAS) ---
         const totalGross = filteredLogs.reduce((sum, item) => sum + (item.paid ? parseInt(item.cost) : 0), 0);
-        
-        // 2. Hitung Total Pengeluaran
         const totalExp = filteredExpenses.reduce((sum, item) => sum + parseInt(item.amount), 0);
-
-        // 3. Hitung Bersih
         const netIncome = totalGross - totalExp;
 
-        // Update UI Angka Besar
+        // Update Tampilan Angka Besar
         if(document.getElementById('net-income')) {
             document.getElementById('net-income').innerText = "Rp " + netIncome.toLocaleString();  
             document.getElementById('total-income-gross').innerText = "Rp " + totalGross.toLocaleString();
             document.getElementById('total-expense-display').innerText = "Rp " + totalExp.toLocaleString();
         }
 
-        // --- Render Tabel Logs (Sama seperti sebelumnya) ---
+        // --- FUNGSI HELPER: MENDAPATKAN TANGGAL BISNIS (BIAR JAM 01:00 MASUK HARI KEMARIN) ---
+        const getBusinessDateKey = (timestamp) => {
+            const d = new Date(timestamp);
+            // Jika jam kurang dari jam 3 pagi, mundur 1 hari untuk label tanggalnya
+            if (d.getHours() < cutoffHour) {
+                d.setDate(d.getDate() - 1);
+            }
+            return d.toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
+        };
+
+        // --- GROUPING DATA UNTUK TABEL ---
+        // 1. Masukkan Pendapatan ke Group
         const groups = filteredLogs.reduce((acc, log) => {
-            const dateKey = new Date(log.end).toLocaleDateString('id-ID', { day:'2-digit', month:'short', year:'numeric' });
-            if (!acc[dateKey]) acc[dateKey] = { logs: [], dailyTotal: 0 };
+            const dateKey = getBusinessDateKey(log.end);
+            if (!acc[dateKey]) acc[dateKey] = { logs: [], income: 0, expense: 0 };
             acc[dateKey].logs.push(log);
-            if (log.paid) acc[dateKey].dailyTotal += parseInt(log.cost || 0);
+            if (log.paid) acc[dateKey].income += parseInt(log.cost || 0);
             return acc;
         }, {});
 
+        // 2. Masukkan Pengeluaran ke Group yang sama (Agar mengurangi total per hari)
+        filteredExpenses.forEach(exp => {
+            const dateKey = getBusinessDateKey(exp.date);
+            // Jika hari itu ada pengeluaran tapi tidak ada main (log kosong), tetap buat group
+            if (!groups[dateKey]) groups[dateKey] = { logs: [], income: 0, expense: 0 };
+            groups[dateKey].expense += parseInt(exp.amount);
+        });
+
+        // --- RENDER TABEL HTML ---
         let html = "";
-        Object.keys(groups).forEach((date, index) => {
+        // Urutkan key tanggal (descending / terbaru diatas)
+        const sortedKeys = Object.keys(groups).sort((a, b) => new Date(b) - new Date(a)); // Sort sederhana string date ID
+
+        sortedKeys.forEach((date, index) => {
             const group = groups[date];
+            // Hitung Bersih Harian (Pendapatan - Pengeluaran)
+            const dailyNet = group.income - group.expense;
+            
+            // Warna Text Saldo Harian (Merah jika minus/rugi, Hijau jika untung)
+            const netColor = dailyNet < 0 ? '#ffcccb' : 'var(--success)';
+
             html += `
-                <tr onclick="toggleGroup(${index})" style="background: #2c2c35; cursor: pointer; border-left: 4px solid var(--primary);">
-                    <td colspan="4" style="text-align: left; padding: 12px; font-weight: bold; font-family: 'Orbitron'; font-size: 0.8rem;">
-                        📅 ${date} <span style="color: var(--success); margin-left:10px;">(Rp ${group.dailyTotal.toLocaleString()})</span>
+                <tr onclick="toggleGroup(${index})" style="background: #2c2c35; cursor: pointer; border-left: 4px solid var(--primary); border-bottom: 1px solid #111;">
+                    <td colspan="4" style="text-align: left; padding: 12px;">
+                        <div style="font-weight: bold; font-family: 'Orbitron'; font-size: 0.8rem; color: #fff;">📅 ${date}</div>
+                        <div style="font-size: 0.65rem; color: #aaa; margin-top: 2px;">
+                            IN: ${group.income.toLocaleString()} | OUT: ${group.expense.toLocaleString()}
+                        </div>
                     </td>
-                    <td colspan="3" style="text-align: right; padding-right: 15px; color: #888;">${group.logs.length} Laps ▾</td>
+                    <td colspan="3" style="text-align: right; padding-right: 15px;">
+                        <div style="color: ${netColor}; font-weight: bold; font-family: 'Orbitron';">Rp ${dailyNet.toLocaleString()}</div>
+                        <small style="color: #666;">${group.logs.length} Unit ▾</small>
+                    </td>
                 </tr>
                 <tr id="group-${index}" style="display: none; background: #15151e;">
                     <td colspan="7" style="padding: 0;">
@@ -904,7 +949,7 @@ function renderLogs() {
                             <tr style="color: var(--primary); font-weight: bold; background: #1a1a24;">
                                 <td style="padding: 8px;">UNIT</td><td>JAM</td><td>DUR</td><td>BIAYA</td><td>CREW</td><td>OPS</td>
                             </tr>
-                            ${group.logs.map((l, logIdx) => `
+                            ${group.logs.map((l) => `
                                 <tr style="border-bottom: 1px solid #222;">
                                     <td style="padding: 8px;"><b>${l.unit}</b></td>
                                     <td>${new Date(l.end).toLocaleTimeString('id-ID', {hour:'2-digit', minute:'2-digit'})}</td>
@@ -914,13 +959,14 @@ function renderLogs() {
                                     <td>${isAdmin ? `<button onclick="deleteLogWithConfirm(${logs.indexOf(l)})" style="background:none; color:var(--danger); border:none; padding:0;">🗑️</button>` : '✔'}</td>
                                 </tr>
                             `).join('')}
+                            ${group.logs.length === 0 ? '<tr><td colspan="6" style="padding:10px; text-align:center; color:#555;">Hanya ada pengeluaran, tidak ada rental.</td></tr>' : ''}
                         </table>
                     </td>
                 </tr>
             `;
         });
 
-        document.getElementById('log-body').innerHTML = html || "<tr><td colspan='7' style='padding:20px; color:#888;'>TIDAK ADA DATA TELEMETRY</td></tr>";  
+        document.getElementById('log-body').innerHTML = html || "<tr><td colspan='7' style='padding:20px; color:#888; text-align:center;'>TIDAK ADA DATA TELEMETRY</td></tr>";  
     }
 // Fungsi Helper untuk Toggle Detail
 function toggleGroup(id) {
