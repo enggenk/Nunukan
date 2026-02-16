@@ -152,8 +152,8 @@
     <div style="display:flex; justify-content:space-between; align-items:flex-end; margin-bottom:15px; border-bottom: 2px solid var(--primary); padding-bottom:10px;">  
         
         <img src="https://enggenk.github.io/Nunukan/1770574638579.png" alt="SINJAI RACE" style="height: 45px; width: auto; object-fit: contain;">
+<div id="cache-version" style="font-size:1rem; color:#E6E6FA; font-family:'Orbitron'; margin-top:1px;">Ver: Checking...</div>
 
-        <div id="cache-version" style="font-size:0.3; color:#557; font-family:'Orbitron'; margin-top:1px;">Ver: Checking System...</div>  
 
             <div style="text-align:right">  
                 <div id="live-clock" style="font-weight:bold; color:var(--success); font-family:'Orbitron'; font-size:0.7rem;">00:00:00</div>  
@@ -1099,22 +1099,40 @@ handleConnectionChange();
 
 // --- SCRIPT PENGAMBIL VERSI CACHE ---
 // Fungsi ini akan mengecek nama cache yang dibuat oleh sw.js
-function displayCacheVersion() {
+async function displayCacheVersion() {
+    const versionEl = document.getElementById('cache-version');
+    
     if ('caches' in window) {
-        caches.keys().then(function(keyList) {
-            const versionEl = document.getElementById('cache-version');
+        try {
+            // Mencoba mengambil kunci cache
+            const keyList = await caches.keys();
+            
             if (keyList.length > 0) {
-                // Mengambil nama cache terakhir (biasanya berisi versi)
-                // Contoh output: "sinjai-race-v1"
-                versionEl.innerText = "" + keyList[0].toUpperCase(); 
+                // Mengambil nama cache (misal: 'sinjai-race-v1')
+                // Kita bersihkan sedikit teksnya agar cantik (hapus dash/tanda hubung)
+                const versionName = keyList[0].toUpperCase().replace(/-/g, ' ');
+                versionEl.innerText = versionName;
             } else {
-                versionEl.innerText = "VER: ONLINE / NO CACHE";
+                // Jika tidak ada cache, tunggu 2 detik lalu coba lagi (masa instalasi SW)
+                setTimeout(() => {
+                    caches.keys().then(keys => {
+                        if(keys.length > 0) versionEl.innerText = keys[0].toUpperCase();
+                        else versionEl.innerText = "VER: CLOUD MODE";
+                    });
+                }, 2000);
             }
-        });
+        } catch (err) {
+            versionEl.innerText = "VER: SYSTEM READY";
+        }
+    } else {
+        versionEl.innerText = "VER: LEGACY BROWSER";
     }
 }
 
-// Panggil fungsi setelah halaman dimuat
-window.addEventListener('load', displayCacheVersion);
+// Pastikan dipanggil setelah halaman benar-benar siap
+window.addEventListener('load', () => {
+    // Beri jeda 1 detik agar Service Worker selesai inisialisasi
+    setTimeout(displayCacheVersion, 1000);
+});
 </script>  </body>  
 </html>
