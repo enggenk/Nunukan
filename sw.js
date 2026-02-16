@@ -3,7 +3,7 @@ const ASSETS_TO_CACHE = [
   './',
   './index.html',
   './manifest.json',
-  'https://enggenk.github.io/Sinjai/logo-512.png',
+  'https://enggenk.github.io/Nunukan/1770574638579.png',
   'https://actions.google.com/sounds/v1/alarms/beep_short.ogg',
   'https://actions.google.com/sounds/v1/alarms/digital_alarm_clock.ogg',
   'https://enggenk.github.io/Sinjai/qris (1).jpg'
