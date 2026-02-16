@@ -360,7 +360,7 @@ EJECT SYSTEM (LOGOUT)
 <div id="modal-swap-unit" class="modal-overlay" style="display:none;">  
     <div class="modal-box">  
         <h3 id="swap-unit-title" style="font-family:'Orbitron';">SWITCH CAR</h3>  
-        <p style="font-size:0.8rem">Select target machine (must be empty):</p>  
+        <p style="font-size:0.8rem">Pilih Mobil Yang Ready:</p>  
         <div id="swap-unit-list" style="display:flex; flex-direction:column; gap:10px;"></div>  
         <button onclick="closeSwapModal()" style="background:none; color:#888; margin-top:10px; width:100%; font-family:'Orbitron';">CANCEL</button>  
     </div>  
@@ -648,7 +648,7 @@ unitNames.forEach((name, i) => {
             <div style="display:flex; justify-content:space-between; align-items:center;">  
                 <div style="font-weight:800; font-family:'Orbitron'; color:#eee; font-size:0.8rem">${name}</div>  
                 <div style="display:flex; gap:8px;">  
-                    ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--success); font-size:1rem; padding:0;">🔄</button>` : ''}  
+                    ${isActive ? `<button onclick="openSwapModal(${i})" style="background:none; color:var(--success); font-size:1rem; padding:0;">⇄</button>` : ''}  
                     <div style="display:flex; gap:5px;">  
                         <button onclick="editUnitName(${i})" style="background:none; color:#888; padding:0;">✏️</button>  
                         <button onclick="deleteUnit(${i})" style="background:none; color:var(--danger); padding:0;">🗑️</button>  
@@ -656,7 +656,7 @@ unitNames.forEach((name, i) => {
                 </div>  
             </div>  
             <div class="user-tag">${activeUsers[i] || "AVAILABLE"}</div>  
-            <div class="transfer-tag">${activeTransferInfo[i] ? "FROM " + activeTransferInfo[i] : ""}</div>  
+            <div class="transfer-tag">${activeTransferInfo[i] ? "Pindahan dari mobil " + activeTransferInfo[i] : ""}</div>  
             <div class="timer-display" id="timer-${i}">READY</div>  
             <div id="ctrl-${i}">  
                 ${isActive ? '' : `<button class="btn-main" onclick="openStart(${i})">START RACE</button>`}  
@@ -711,7 +711,7 @@ function renderRunningCtrl(i) {
 
     function openSwapModal(i) {  
         swapSourceIdx = i;  
-        document.getElementById('swap-unit-title').innerText = "SWITCH CAR " + unitNames[i];  
+        document.getElementById('swap-unit-title').innerText = "GANTI MOBIL " + unitNames[i];  
         const list = document.getElementById('swap-unit-list');  
         list.innerHTML = "";  
         let emptyUnitsFound = false;  
