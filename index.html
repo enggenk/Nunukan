@@ -10,7 +10,9 @@
 <link rel="icon" type="image/png" sizes="192x192" href="https://enggenk.github.io/Nunukan/1770574638579.png">  
 <link rel="apple-touch-icon" href="https://enggenk.github.io/Nunukan/1770574638579.png">  <link rel="manifest" href="manifest.json">  <meta name="theme-color" content="#e10600">  
 <meta name="mobile-web-app-capable" content="yes">  
-<meta name="apple-mobile-web-app-capable" content="yes">  <style>  
+<meta name="apple-mobile-web-app-capable" content="yes">  
+
+<style>  
     @import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Roboto+Condensed:wght@400;700&display=swap');
 
     :root {   
@@ -23,8 +25,40 @@
         --card-bg: #1f1f27;  
         --text-light: #ffffff;
     }  
+      /* Gaya untuk Banner Update */
+#update-banner {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    background: #e10600; /* Warna merah F1 */
+    color: white;
+    text-align: center;
+    padding: 15px;
+    z-index: 10000;
+    font-family: 'Orbitron', sans-serif;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+    border-bottom: 2px solid #fff;
+}
+#update-banner button {
+    background: white;
+    color: #e10600;
+    border: none;
+    padding: 8px 15px;
+    margin-left: 15px;
+    font-weight: bold;
+    cursor: pointer;
+    border-radius: 4px;
+    text-transform: uppercase;
+}
+
 
     body {   
+      
+
+
+      
         font-family: 'Roboto Condensed', sans-serif;   
         background: var(--bg);   
         background-image: radial-gradient(circle at 20% 20%, #2c2c2c 0%, #0b0b0b 100%);
@@ -126,7 +160,16 @@
 </style>
 
 </head>  
-<body>  <audio id="alarm-finished" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>  
+
+<body>  
+<div id="update-banner">
+    Versi baru tersedia! 
+    <button onclick="window.location.reload()">UPDATE SEKARANG</button>
+</div>
+
+
+
+<audio id="alarm-finished" src="https://actions.google.com/sounds/v1/alarms/beep_short.ogg"></audio>  
 <audio id="alarm-warning" src="https://actions.google.com/sounds/v1/alarms/digital_alarm_clock.ogg"></audio>  
 
 <div id="login-overlay">  
@@ -1038,10 +1081,33 @@ if (localStorage.getItem('pending_sync')) { saveAppState(); localStorage.removeI
 
 function logout() { localStorage.removeItem('currentUser'); location.reload(); }  
     
-    if ('serviceWorker' in navigator) {  
-    window.addEventListener('load', () => {  
-        navigator.serviceWorker.register('./sw.js').catch((err) => console.log('SW Gagal: ', err));  
-    }); }
+    if ('serviceWorker' in navigator) {
+    window.addEventListener('load', () => {
+        navigator.serviceWorker.register('sw.js').then(reg => {
+            
+            // Periksa jika ada update saat aplikasi dibuka
+            reg.addEventListener('updatefound', () => {
+                const newWorker = reg.installing;
+                newWorker.addEventListener('statechange', () => {
+                    // Jika Service Worker baru selesai diinstal (installed/waiting)
+                    if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+                        document.getElementById('update-banner').style.display = 'block';
+                    }
+                });
+            });
+
+        }).catch(err => console.error("SW Registration Failed:", err));
+    });
+
+    // Otomatis refresh jika Service Worker baru mengambil alih kontrol
+    let refreshing = false;
+    navigator.serviceWorker.addEventListener('controllerchange', () => {
+        if (!refreshing) {
+            window.location.reload();
+            refreshing = true;
+        }
+    });
+}
 
     let deferredPrompt;  
     const installModal = document.getElementById('modal-install-pwa');  
@@ -1104,28 +1170,26 @@ async function displayCacheVersion() {
     
     if ('caches' in window) {
         try {
-            // Mencoba mengambil kunci cache
             const keyList = await caches.keys();
             
-            if (keyList.length > 0) {
-                // Mengambil nama cache (misal: 'sinjai-race-v1')
-                // Kita bersihkan sedikit teksnya agar cantik (hapus dash/tanda hubung)
-                const versionName = keyList[0].toUpperCase().replace(/-/g, ' ');
-                versionEl.innerText = versionName;
+            // Cari cache yang diawali dengan nama 'SINJAI'
+            const appCache = keyList.find(key => key.toUpperCase().includes('SINJAI'));
+            
+            if (appCache) {
+                versionEl.innerText = "" + appCache.toUpperCase().replace(/-/g, ' ');
             } else {
-                // Jika tidak ada cache, tunggu 2 detik lalu coba lagi (masa instalasi SW)
-                setTimeout(() => {
-                    caches.keys().then(keys => {
-                        if(keys.length > 0) versionEl.innerText = keys[0].toUpperCase();
-                        else versionEl.innerText = "VER: CLOUD MODE";
-                    });
-                }, 2000);
+                // Jika belum ketemu, coba lagi 1 detik kemudian (maksimal 5x coba)
+                if (!window.retryCount) window.retryCount = 0;
+                if (window.retryCount < 5) {
+                    window.retryCount++;
+                    setTimeout(displayCacheVersion, 1000);
+                } else {
+                    versionEl.innerText = "VER: ONLINE";
+                }
             }
         } catch (err) {
-            versionEl.innerText = "VER: SYSTEM READY";
+            versionEl.innerText = "VER: READY";
         }
-    } else {
-        versionEl.innerText = "VER: LEGACY BROWSER";
     }
 }
 
