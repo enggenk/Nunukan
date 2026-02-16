@@ -1,4 +1,4 @@
-const CACHE_NAME = 'sinjai-v3';
+const CACHE_NAME = 'sinjai-v7';
 const ASSETS_TO_CACHE = [
   './',
   './index.html',
