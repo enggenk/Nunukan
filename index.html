@@ -167,7 +167,7 @@
     <div id="view-queue" class="view-section">  
         <h2 style="font-family:'Orbitron';">🏁 STARTING GRID / ANTRIAN</h2>  
         <div class="admin-card">  
-            <input type="text" id="q-name" placeholder="DRIVER NAME" oninput="checkQueueReady()">  
+            <input type="text" id="q-name" placeholder="NAMA PENYEWA" oninput="checkQueueReady()">  
             <div style="display: flex; gap: 10px;">  
                 <select id="q-dur" onchange="checkQueueReady()">  
                     <option value="" disabled selected> DURASI</option>  
@@ -175,10 +175,10 @@
                 </select>  
                 <select id="q-pay-init" onchange="checkQueueReady()">  
                     <option value="" disabled selected>BAYAR?</option>  
-                    <option value="false">NO</option><option value="true">YES</option>  
+                    <option value="false">BELUMPI</option><option value="true">SUDAHMI</option>  
                 </select>  
             </div>  
-            <button id="btn-add-queue" onclick="addToQueue()" class="btn-main" style="margin-top:10px" disabled>CONFIRM GRID POSITION</button>  
+            <button id="btn-add-queue" onclick="addToQueue()" class="btn-main" style="margin-top:10px" disabled>KONFIMASI</button>  
         </div>  
         <div class="admin-card" style="padding:10px;"><table id="queue-table"></table></div>  
     </div>  
@@ -216,10 +216,10 @@
 
         <div id="report-income-section">
             <div class="filter-bar">  
-                <button class="filter-btn active" onclick="setReportFilter('all', this)">ALL</button>  
-                <button class="filter-btn" onclick="setReportFilter('daily', this)">TODAY</button>  
-                <button class="filter-btn" onclick="setReportFilter('weekly', this)">WEEK</button>  
-                <button class="filter-btn" onclick="setReportFilter('monthly', this)">MONTH</button>  
+                <button class="filter-btn active" onclick="setReportFilter('all', this)">SEMUA</button>  
+                <button class="filter-btn" onclick="setReportFilter('daily', this)">HARI INI</button>  
+                <button class="filter-btn" onclick="setReportFilter('weekly', this)">MINGGUAN</button>  
+                <button class="filter-btn" onclick="setReportFilter('monthly', this)">BULANAN </button>  
             </div>  
             
             <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">  
@@ -278,9 +278,9 @@
 EJECT SYSTEM (LOGOUT)
 </button>  
         </div>  <div class="taskbar">  
-        <button class="nav-item active" onclick="switchView('units', this)"><span>🏎️</span>TRACK</button>  
-        <button class="nav-item" onclick="switchView('queue', this)"><span>🚦</span>GRID</button>  
-        <button class="nav-item" onclick="switchView('qris', this)"><span>💳</span>PIT</button>  
+        <button class="nav-item active" onclick="switchView('units', this)"><span>🏎️</span>TIMER</button>  
+        <button class="nav-item" onclick="switchView('queue', this)"><span>🚦</span>ANTRIAN</button>  
+        <button class="nav-item" onclick="switchView('qris', this)"><span>💳</span>QRIS</button>  
         <button class="nav-item" onclick="switchView('reports', this)"><span>📊</span>LOGS</button>  
         <button class="nav-item" onclick="switchView('admin', this)"><span>🛠️</span>HQ</button>  
     </div>  
@@ -816,7 +816,7 @@ function addToQueue() {
         document.getElementById('queue-table').innerHTML = queue.map((q, idx) => `  
             <tr>  
                 <td style="text-align:left; color:#eee;"><b>${q.name}</b><br><small style="color:var(--success)">${q.dur} MIN STINT</small></td>  
-                <td><span class="q-badge ${q.paid ? 'q-paid' : 'q-unpaid'}" style="padding:4px 8px; border-radius:3px; font-size:0.6rem; font-weight:bold; background:${q.paid?'var(--success)':'var(--danger)'}; color:white;" onclick="toggleQueuePaid(${idx})">${q.paid ? 'PAID' : 'DUE'}</span></td>  
+                <td><span class="q-badge ${q.paid ? 'q-paid' : 'q-unpaid'}" style="padding:4px 8px; border-radius:3px; font-size:0.6rem; font-weight:bold; background:${q.paid?'var(--success)':'var(--danger)'}; color:white;" onclick="toggleQueuePaid(${idx})">${q.paid ? 'LUNASMI' : 'BELUMPI'}</span></td>  
                 <td style="text-align:right">  
                     <button onclick="openQSelectModal(${idx})" style="background:var(--success); color:white; padding:5px 10px;">▶</button>   
                     <button onclick="queue.splice(${idx},1);saveAppState()" style="color:var(--danger); background:none; font-size:1.2rem;">✖</button>  
