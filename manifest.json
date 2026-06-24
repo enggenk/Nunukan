@@ -1,6 +1,6 @@
 {
   "name": "YSA021 Sinjai Timer",
-  "short_name": "SinjaiTimer",
+  "short_name": "BarruTimer",
   "start_url": "./index.html",
   "display": "standalone",
   "background_color": "#e0f2fe",
